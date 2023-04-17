@@ -162,7 +162,7 @@ class CONSTANTS:
             'G<sub>1</sub> = G<sub>a</sub> - ΔG<sub>dpn</sub>',
         )
         FORMULAS_N = (
-            'P<sub>s%d</sub> = P<sub>sa</sub> - 0.5·ρ<sub>a</sub>·(∑ζ<sub>%d</sub> + λ<sub>%d</sub>·l<sub>%d</sub>/d<sub>e%d</sub>)·(G<sub>a</sub>/(ρ<sub>a</sub>·F<sub>%d</sub>))<sup>2</sup>',
+            'P<sub>s%d</sub> = P<sub>s%s</sub> - 0.5·ρ<sub>a</sub>·(∑ζ<sub>%d</sub> + λ<sub>%d</sub>·l<sub>%d</sub>/d<sub>e%d</sub>)·(G<sub>a</sub>/(ρ<sub>a</sub>·F<sub>%d</sub>))<sup>2</sup>',
             '-',
             '-',
             '-',
