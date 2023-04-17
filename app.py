@@ -45,10 +45,8 @@ class MainWindow(QMainWindow):
         self.box_style = 'QGroupBox::title { color: blue; }'
 
         menubar = self.menuBar()
-        menu_style = 'QMenu::item:selected { background-color: #FFFFFF; }'
         file_menu = menubar.addMenu(CONSTANTS.MENU[0])
         save_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
-        file_menu.setStyleSheet(menu_style)
         file_menu.addAction(save_action)
         open_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
         file_menu.addAction(open_action)
@@ -65,7 +63,7 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self.show_about)
 
         # menubar.triggered.connect(self.open_manual)
-        menubar.setStyleSheet('background-color: #E0E0E0; font-family: Consolas; font-size: 13px; color: blue')
+        menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
@@ -370,7 +368,10 @@ class MainWindow(QMainWindow):
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                             label.setStyleSheet("background-color: #E0E0E0")
                             table.setCellWidget(row, 1, label)
-                            label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1, n-1, n-1, n-1))
+                            if self.groupbox_count == 2:
+                                label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, 'n', n-1, n-1, n-1, n-1, n-1))
+                            else:
+                                label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, str(n-2), n-1, n-1, n-1, n-1, n-1))
                         case 6:
                             label = QLabel()
                             label.setFont(font)
@@ -980,7 +981,7 @@ class MainWindow(QMainWindow):
         den = float(de)
         Fn = float(F)
         Lambda_n = float(Lambda)
-        result = Psa - 0.5 * density_a * (KMSn + Lambda_n * Ln / den) * pow((Ga / density_a * Fn), 2)
+        result = Psa - 0.5 * density_a * (KMSn + Lambda_n * Ln / den) * pow((Ga / (density_a * Fn)), 2)
         result = "{:.0f}".format(round(result, 0))
         return result
 
