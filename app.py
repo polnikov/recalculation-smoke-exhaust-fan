@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(CONSTANTS.APP_TITLE)
         self.groupbox_count = 0
+        self.current_file_path = None
+        self.data_changed = False
         self.box_style = 'QGroupBox::title { color: blue; }'
 
         menubar = self.menuBar()
@@ -55,7 +57,12 @@ class MainWindow(QMainWindow):
         save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
         file_menu.addAction(save_action)
 
+        save_as_action = QAction(CONSTANTS.FILE_SUBMENU[2], self)
+        save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
+        file_menu.addAction(save_as_action)
+
         save_action.triggered.connect(self.save)
+        save_as_action.triggered.connect(self.save_as)
         open_action.triggered.connect(self.open)
 
         manual_action = QAction(CONSTANTS.MENU[1], self)
@@ -190,21 +197,22 @@ class MainWindow(QMainWindow):
             font = QFont('Consolas', 12)
             item.setFont(font)
             table.setItem(row, 3, item)
-            if row in (0, 1, 3, 5, 7):  # editable
+            if row in CONSTANTS.TABLE1.EDITABLE_ROWS:  # editable
                 table.item(row, 3).setBackground(QColor(204, 255, 204))
             else:
                 table.item(row, 3).setBackground(QColor(239, 239, 239))
                 table.item(row, 3).setFlags(Qt.ItemFlag.ItemIsEnabled)
             table.item(row, 3).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        for n, row in enumerate((0, 1, 3, 5, 7)):
+        for n, row in enumerate(CONSTANTS.TABLE1.EDITABLE_ROWS):
             table.item(row, 3).setToolTip(f'<span style="font-family: Consolas; color: red">{CONSTANTS.TABLE1.INPUTS_TOOLTIPS[n]}</span>')
 
         # заголовок
         for row in range(t_rows):
-            if row in (1, 3, 5):
+            if row in CONSTANTS.TABLE1.SPAN_ROWS:
                 table.setSpan(row, 0, 2, 1)
-        for row in (0, 1, 3, 5, 7, 8, 9):
+
+        for row in CONSTANTS.TABLE1.HEADER_ROWS:
             self._set_value_in_cell(row, 0, CONSTANTS.TABLE1.HEADER, table)
 
         for row in range(t_rows):
@@ -318,7 +326,7 @@ class MainWindow(QMainWindow):
             font = QFont('Consolas', 12)
             item.setFont(font)
             table.setItem(row, 3, item)
-            if row in (1, 2, 3, 4, 5, 10, 11):  # editable
+            if row in CONSTANTS.DEFAULT_TABLE.EDITABLE_ROWS:  # editable
                 table.item(row, 3).setBackground(QColor(204, 255, 204))
             else:
                 table.item(row, 3).setBackground(QColor(239, 239, 239))
@@ -330,7 +338,7 @@ class MainWindow(QMainWindow):
 
         # заголовок
         for row in range(t_rows):
-            if row in (4, 10):
+            if row in CONSTANTS.DEFAULT_TABLE.SPAN_ROWS:
                 table.setSpan(row, 0, 2, 1)
         for row in range(t_rows):
             if row not in (5, 11):
@@ -493,7 +501,30 @@ class MainWindow(QMainWindow):
         self._update_result_after_delete_table()
 
 
-    def save(self) -> None:
+    def save(self):
+        if self.current_file_path is None:
+            self.save_as()
+        else:
+            data = []
+            tables = self.findChildren(QTableWidget)
+
+            for table in tables:
+                match table.objectName():
+                    case 'table_1':
+                        table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.TABLE1]
+                        data.append({'table_1': table_data})
+                    case 'table_2':
+                        table_data = [table.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).text()]
+                        data.append({'table_2': table_data})
+                    case 'default_table':
+                        table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
+                        data.append({'default_table': table_data})
+
+            with open(self.current_file_path, 'w') as file:
+                json.dump(data, file)
+
+
+    def save_as(self) -> None:
         data = []
         tables = self.findChildren(QTableWidget)
 
@@ -506,25 +537,36 @@ class MainWindow(QMainWindow):
                     table_data = [table.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).text()]
                     data.append({'table_2': table_data})
                 case 'default_table':
-                    number = tables.index(table) - 1
                     table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
                     data.append({'default_table': table_data})
-        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
 
+        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
         if file_name:
+            self.current_file_path = file_name
+            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} - {file_name}')
+
             with open(file_name, 'w') as file:
                 json.dump(data, file)
 
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть программу?\nНе сохраненный расчет будет потерян.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if self.current_file_path is None:
+            reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть программу?\nНе сохраненный расчет будет потерян.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
-        if reply == QMessageBox.No:
-            self.save()
-            event.accept()
-            event.ignore()
+            if reply == QMessageBox.No:
+                self.save()
+                event.accept()
+                event.ignore()
+            else:
+                event.accept()
         else:
-            event.accept()
+            reply = QMessageBox.question(self, 'Подтверждение', 'Сохранить текущие изменения?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                event.accept()
+            else:
+                self.save
+                event.accept()
 
 
     def open(self) -> None:
