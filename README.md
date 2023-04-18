@@ -5,7 +5,7 @@
 
 ### **Main stack:**
 - Python 3.10.6
-- PyQSide 6.5.0
+- PySide6 6.5.0
 - pyinstaller 5.9.0
 
 ### **Interface**
