@@ -142,6 +142,8 @@ class MainWindow(QMainWindow):
                 case 1 | 4 | 5:
                     label.setFixedWidth(60)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    if i == 1:
+                        label.setText('-')
                 case 3:
                     label.setFixedWidth(100)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -1128,7 +1130,7 @@ class MainWindow(QMainWindow):
             if Ta:
                 self.board.itemAtPosition(0, 1).widget().setText(Ta)
             else:
-                self.board.itemAtPosition(0, 1).widget().setText('')
+                self.board.itemAtPosition(0, 1).widget().setText('-')
 
 
 
