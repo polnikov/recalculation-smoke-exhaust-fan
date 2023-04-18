@@ -46,10 +46,14 @@ class MainWindow(QMainWindow):
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu(CONSTANTS.MENU[0])
-        save_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
-        file_menu.addAction(save_action)
-        open_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
+
+        open_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
+        open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
         file_menu.addAction(open_action)
+
+        save_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
+        save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
+        file_menu.addAction(save_action)
 
         save_action.triggered.connect(self.save)
         open_action.triggered.connect(self.open)
@@ -80,6 +84,7 @@ class MainWindow(QMainWindow):
 
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
+
         _layout.addWidget(self.create_board(), alignment=Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(scroll_area)
 
@@ -109,10 +114,10 @@ class MainWindow(QMainWindow):
 
     def create_board(self) -> object:
         _widget = QWidget()
+        _widget.setStyleSheet('background-color: white; ')
         _layout = QGridLayout()
         _layout.setHorizontalSpacing(12)
         self.board = _layout
-        # _layout.setStyleSheet("background-color: #FFFFFF; border: 1px")
 
         labels = CONSTANTS.BOARD.LABELS
         for i in range(len(labels)):
@@ -188,7 +193,7 @@ class MainWindow(QMainWindow):
             if row in (0, 1, 3, 5, 7):  # editable
                 table.item(row, 3).setBackground(QColor(204, 255, 204))
             else:
-                table.item(row, 3).setBackground(QColor(224, 224, 224))
+                table.item(row, 3).setBackground(QColor(239, 239, 239))
                 table.item(row, 3).setFlags(Qt.ItemFlag.ItemIsEnabled)
             table.item(row, 3).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -223,8 +228,7 @@ class MainWindow(QMainWindow):
         table.cellChanged.connect(self.calculate_pressure_after_Psa)
         table.cellChanged.connect(self.calculate_Ga)
 
-        # table.setStyleSheet('QTableView { gridline-color: 1px black; }')
-        table.setStyleSheet('QTableWidget { border: 0.5px solid grey; font-family: Consolas; }')
+        table.setStyleSheet('QTableWidget { border: 0px solid grey; font-family: Consolas; }')
         table.setMinimumWidth(1562)
         table.setMinimumHeight(402)
         return table
@@ -255,7 +259,7 @@ class MainWindow(QMainWindow):
             if row == 3:  # editable
                 table.item(row, 3).setBackground(QColor(204, 255, 204))
             else:
-                table.item(row, 3).setBackground(QColor(224, 224, 224))
+                table.item(row, 3).setBackground(QColor(239, 239, 239))
                 table.item(row, 3).setFlags(Qt.ItemFlag.ItemIsEnabled)
             table.item(row, 3).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -278,8 +282,7 @@ class MainWindow(QMainWindow):
         table.cellChanged.connect(self.calculate_Psa)
         table.cellChanged.connect(self.calculate_pressure_after_Psa)
 
-        # table.setStyleSheet('QTableView { gridline-color: 0.5px black; }')
-        table.setStyleSheet('QTableWidget { border: 0.5px solid grey; }')
+        table.setStyleSheet('QTableWidget { border: 0px solid grey; font-family: Consolas; }')
         table.setMinimumWidth(1562)
         table.setMinimumHeight(202)
         return table
@@ -289,6 +292,7 @@ class MainWindow(QMainWindow):
         self.groupbox_count += 1
         _box = QGroupBox(f'Участок {self.groupbox_count}')
         _box.setStyleSheet(self.box_style)
+        _box.setFont(QFont('Consolas', 12))
         _layout = QVBoxLayout()
         spacer = QSpacerItem(1500, 10)
         _layout.addSpacerItem(spacer)
@@ -317,7 +321,7 @@ class MainWindow(QMainWindow):
             if row in (1, 2, 3, 4, 5, 10, 11):  # editable
                 table.item(row, 3).setBackground(QColor(204, 255, 204))
             else:
-                table.item(row, 3).setBackground(QColor(224, 224, 224))
+                table.item(row, 3).setBackground(QColor(239, 239, 239))
                 table.item(row, 3).setFlags(Qt.ItemFlag.ItemIsEnabled)
             table.item(row, 3).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -349,14 +353,14 @@ class MainWindow(QMainWindow):
                     label = QLabel()
                     label.setFont(font)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #E0E0E0")
+                    label.setStyleSheet("background-color: #EFEFEF")
                     table.setCellWidget(row, 2, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.SYMBOLS_N[row] % (n - 1))
                 else:
                     label = QLabel()
                     label.setFont(font)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #E0E0E0")
+                    label.setStyleSheet("background-color: #EFEFEF")
                     table.setCellWidget(row, 2, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.SYMBOLS_N[row] % n)
 
@@ -366,7 +370,7 @@ class MainWindow(QMainWindow):
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             if self.groupbox_count == 2:
                                 label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, 'n', n-1, n-1, n-1, n-1, n-1))
@@ -376,46 +380,44 @@ class MainWindow(QMainWindow):
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1, n-1, n-1))
                         case 7 | 12:
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1))
                         case 9:
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1, n-1))
                         case 13:
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1))
                         case _:
                             label = QLabel()
                             label.setFont(font)
                             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #E0E0E0")
+                            label.setStyleSheet("background-color: #EFEFEF")
                             table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row])
                 else:
                     label = QLabel()
                     label.setFont(font)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #E0E0E0")
+                    label.setStyleSheet("background-color: #EFEFEF")
                     table.setCellWidget(row, 1, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n, n-1, n-1))
-
-
 
         table.itemChanged.connect(self.validate_input_data_in_default_table)
         table.itemChanged.connect(self.calculate_den_Fn)
@@ -426,8 +428,7 @@ class MainWindow(QMainWindow):
         table.itemChanged.connect(self.calculate_Lambda_n)
         table.itemChanged.connect(self.calculate_result)
 
-        # table.setStyleSheet('QTableView { gridline-color: 0.5px black; }')
-        table.setStyleSheet('QTableWidget { border: 0.5px solid grey; }')
+        table.setStyleSheet('QTableWidget { border: 0px solid grey; font-family: Consolas; }')
         table.setMinimumWidth(1562)
         table.setMinimumHeight(562)
         _layout.addWidget(table)
@@ -438,7 +439,7 @@ class MainWindow(QMainWindow):
     def _set_value_in_cell(self, row, column, data, table) -> None:
         name = table.objectName()
         label = QLabel()
-        label.setStyleSheet("background-color: #E0E0E0")
+        label.setStyleSheet("background-color: #EFEFEF")
         label.setText(data[row])
         table.setCellWidget(row, column, label)
         if column in (1, 2, 4):
@@ -516,7 +517,7 @@ class MainWindow(QMainWindow):
 
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть программу? Не сохраненный расчет будет потерян.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть программу?\nНе сохраненный расчет будет потерян.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.No:
             self.save()
