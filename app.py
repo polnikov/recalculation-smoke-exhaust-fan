@@ -479,7 +479,7 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
         if file_name:
             self.current_file_path = file_name
-            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} - {file_name}')
+            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
 
             with open(file_name, 'w') as file:
                 json.dump(data, file)
@@ -563,6 +563,8 @@ class MainWindow(QMainWindow):
                         for n, row in enumerate(CONSTANTS.SAVE_OPEN.DEFAULT_TABLE):
                             table.item(row, 3).setText(data[t]['default_table'][n])
                     self._update_num_tables()
+                self.current_file_path = file_name
+                self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
 
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
