@@ -24,6 +24,11 @@ class CONSTANTS:
     TABLE_ROW_HEIGHT = 40
 
 
+    class BUTTONS:
+        ADD = 'Добавить\nучасток'
+        DELETE = 'Удалить\nучасток'
+
+
     class TABLE1:
         NAME = 'table_1'
         EDITABLE_ROWS = (0, 1, 3, 5, 7)

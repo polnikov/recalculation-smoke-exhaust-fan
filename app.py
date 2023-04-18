@@ -43,11 +43,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(CONSTANTS.APP_TITLE)
         self.groupbox_count = 0
         self.current_file_path = None
-        self.data_changed = False
         self.box_style = 'QGroupBox::title { color: blue; }'
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu(CONSTANTS.MENU[0])
+
+        manual_action = QAction(CONSTANTS.MENU[1], self)
+        menubar.addAction(manual_action)
+
+        about_action = QAction(CONSTANTS.MENU[2], self)
+        menubar.addAction(about_action)
+
 
         open_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
         open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
@@ -61,19 +67,12 @@ class MainWindow(QMainWindow):
         save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
         file_menu.addAction(save_as_action)
 
+        open_action.triggered.connect(self.open)
         save_action.triggered.connect(self.save)
         save_as_action.triggered.connect(self.save_as)
-        open_action.triggered.connect(self.open)
-
-        manual_action = QAction(CONSTANTS.MENU[1], self)
-        menubar.addAction(manual_action)
-
-        about_action = QAction(CONSTANTS.MENU[2], self)
-        menubar.addAction(about_action)
-
         about_action.triggered.connect(self.show_about)
-
         # menubar.triggered.connect(self.open_manual)
+
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
         self.tab_widget = QTabWidget(self)
@@ -155,7 +154,7 @@ class MainWindow(QMainWindow):
         self.add_button = QPushButton()
         add_button = self.add_button
         add_button.setFixedSize(80, 50)
-        add_button.setText('Добавить\nучасток')
+        add_button.setText(CONSTANTS.BUTTONS.ADD)
         add_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { background-color: #66CC00; }')
 
         add_button.clicked.connect(self.add_table)
@@ -163,7 +162,7 @@ class MainWindow(QMainWindow):
         self.delete_button = QPushButton()
         delete_button = self.delete_button
         delete_button.setFixedSize(80, 50)
-        delete_button.setText('Удалить\nучасток')
+        delete_button.setText(CONSTANTS.BUTTONS.DELETE)
         delete_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { background-color: #FF6666; }')
 
         delete_button.clicked.connect(self.delete_table)
@@ -184,12 +183,9 @@ class MainWindow(QMainWindow):
         table.setObjectName(CONSTANTS.TABLE1.NAME)
         table.horizontalHeader().setVisible(False)
         table.verticalHeader().setVisible(False)
-        # table.resizeRowsToContents()
-        table.setColumnWidth(0, CONSTANTS.TABLE_COLUMN_WIDTH.get(0))
-        table.setColumnWidth(1, CONSTANTS.TABLE_COLUMN_WIDTH.get(1))
-        table.setColumnWidth(2, CONSTANTS.TABLE_COLUMN_WIDTH.get(2))
-        table.setColumnWidth(3, CONSTANTS.TABLE_COLUMN_WIDTH.get(3))
-        table.setColumnWidth(4, CONSTANTS.TABLE_COLUMN_WIDTH.get(4))
+
+        for col in range(5):
+            table.setColumnWidth(col, CONSTANTS.TABLE_COLUMN_WIDTH.get(col))
 
         # столбец для ввода
         for row in range(t_rows):
@@ -251,12 +247,9 @@ class MainWindow(QMainWindow):
         table.setObjectName(CONSTANTS.TABLE2.NAME)
         table.horizontalHeader().setVisible(False)
         table.verticalHeader().setVisible(False)
-        # table.resizeRowsToContents()
-        table.setColumnWidth(0, CONSTANTS.TABLE_COLUMN_WIDTH.get(0))
-        table.setColumnWidth(1, CONSTANTS.TABLE_COLUMN_WIDTH.get(1))
-        table.setColumnWidth(2, CONSTANTS.TABLE_COLUMN_WIDTH.get(2))
-        table.setColumnWidth(3, CONSTANTS.TABLE_COLUMN_WIDTH.get(3))
-        table.setColumnWidth(4, CONSTANTS.TABLE_COLUMN_WIDTH.get(4))
+
+        for col in range(5):
+            table.setColumnWidth(col, CONSTANTS.TABLE_COLUMN_WIDTH.get(col))
 
         # столбец для ввода
         for row in range(t_rows):
@@ -313,12 +306,9 @@ class MainWindow(QMainWindow):
         table.setObjectName(CONSTANTS.DEFAULT_TABLE.NAME)
         table.horizontalHeader().setVisible(False)
         table.verticalHeader().setVisible(False)
-        # table.resizeRowsToContents()
-        table.setColumnWidth(0, CONSTANTS.TABLE_COLUMN_WIDTH.get(0))
-        table.setColumnWidth(1, CONSTANTS.TABLE_COLUMN_WIDTH.get(1))
-        table.setColumnWidth(2, CONSTANTS.TABLE_COLUMN_WIDTH.get(2))
-        table.setColumnWidth(3, CONSTANTS.TABLE_COLUMN_WIDTH.get(3))
-        table.setColumnWidth(4, CONSTANTS.TABLE_COLUMN_WIDTH.get(4))
+
+        for col in range(5):
+            table.setColumnWidth(col, CONSTANTS.TABLE_COLUMN_WIDTH.get(col))
 
         # столбец для ввода
         for row in range(t_rows):
@@ -340,6 +330,7 @@ class MainWindow(QMainWindow):
         for row in range(t_rows):
             if row in CONSTANTS.DEFAULT_TABLE.SPAN_ROWS:
                 table.setSpan(row, 0, 2, 1)
+
         for row in range(t_rows):
             if row not in (5, 11):
                 self._set_value_in_cell(row, 0, CONSTANTS.DEFAULT_TABLE.HEADER, table)
@@ -357,73 +348,43 @@ class MainWindow(QMainWindow):
             font = QFont('Consolas', 12)
             for row in range(t_rows):
                 n = self.groupbox_count
+                label = QLabel()
+                label.setFont(font)
+                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                label.setStyleSheet('background-color: #EFEFEF')
+                table.setCellWidget(row, 2, label)
                 if row != t_rows-1:
-                    label = QLabel()
-                    label.setFont(font)
-                    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #EFEFEF")
-                    table.setCellWidget(row, 2, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.SYMBOLS_N[row] % (n - 1))
                 else:
-                    label = QLabel()
-                    label.setFont(font)
-                    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #EFEFEF")
-                    table.setCellWidget(row, 2, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.SYMBOLS_N[row] % n)
 
                 if row != t_rows-1:
+                    label = QLabel()
+                    label.setFont(font)
+                    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    label.setStyleSheet('background-color: #EFEFEF')
+                    table.setCellWidget(row, 1, label)
                     match row:
                         case 0:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             if self.groupbox_count == 2:
                                 label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, 'n', n-1, n-1, n-1, n-1, n-1))
                             else:
                                 label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, str(n-2), n-1, n-1, n-1, n-1, n-1))
                         case 6:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1, n-1, n-1))
                         case 7 | 12:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1))
                         case 9:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1, n-1, n-1))
                         case 13:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n-1, n-1))
                         case _:
-                            label = QLabel()
-                            label.setFont(font)
-                            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                            label.setStyleSheet("background-color: #EFEFEF")
-                            table.setCellWidget(row, 1, label)
                             label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row])
                 else:
                     label = QLabel()
                     label.setFont(font)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                    label.setStyleSheet("background-color: #EFEFEF")
+                    label.setStyleSheet('background-color: #EFEFEF')
                     table.setCellWidget(row, 1, label)
                     label.setText(CONSTANTS.DEFAULT_TABLE.FORMULAS_N[row] % (n, n-1, n-1))
 
@@ -455,7 +416,7 @@ class MainWindow(QMainWindow):
             label.setFont(font)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-            if name == 'table_1' and row in (0, 1, 3, 5, 7):
+            if name == 'table_1' and row in (0, 1, 3, 5, 7) and column == 2:
                 label.setToolTip(f'<span style="font-family: Consolas; color: red">{CONSTANTS.TABLE1.VALUES_TOOLTIPS.get(row)}</span>')
 
             if name == 'table_2' and (row, column) == (3, 2):
@@ -505,26 +466,23 @@ class MainWindow(QMainWindow):
         if self.current_file_path is None:
             self.save_as()
         else:
-            data = []
-            tables = self.findChildren(QTableWidget)
-
-            for table in tables:
-                match table.objectName():
-                    case 'table_1':
-                        table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.TABLE1]
-                        data.append({'table_1': table_data})
-                    case 'table_2':
-                        table_data = [table.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).text()]
-                        data.append({'table_2': table_data})
-                    case 'default_table':
-                        table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
-                        data.append({'default_table': table_data})
-
+            data = self._get_data_for_save()
             with open(self.current_file_path, 'w') as file:
                 json.dump(data, file)
 
 
     def save_as(self) -> None:
+        data = self._get_data_for_save()
+        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
+        if file_name:
+            self.current_file_path = file_name
+            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} - {file_name}')
+
+            with open(file_name, 'w') as file:
+                json.dump(data, file)
+
+
+    def _get_data_for_save(self):
         data = []
         tables = self.findChildren(QTableWidget)
 
@@ -539,14 +497,7 @@ class MainWindow(QMainWindow):
                 case 'default_table':
                     table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
                     data.append({'default_table': table_data})
-
-        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
-        if file_name:
-            self.current_file_path = file_name
-            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} - {file_name}')
-
-            with open(file_name, 'w') as file:
-                json.dump(data, file)
+        return data
 
 
     def closeEvent(self, event):
@@ -606,6 +557,10 @@ class MainWindow(QMainWindow):
 
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
+
+
+    def show_about(self):
+        QMessageBox.information(self, "О программе", CONSTANTS.ABOUT)
 
 
     def validate_input_data_in_tables(self, item) -> None:
@@ -1160,8 +1115,6 @@ class MainWindow(QMainWindow):
             self.board.itemAtPosition(0, 3).widget().setText('')
 
 
-    def show_about(self):
-        QMessageBox.information(self, "О программе", CONSTANTS.ABOUT)
 
 
 
