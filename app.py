@@ -136,10 +136,10 @@ class MainWindow(QMainWindow):
             match i:
                 case 0:
                     label.setFixedWidth(890)
-                case 1:
+                case 2:
                     label.setFixedWidth(150)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                case 2 | 4 | 5:
+                case 1 | 4 | 5:
                     label.setFixedWidth(60)
                     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 case 3:
@@ -231,6 +231,7 @@ class MainWindow(QMainWindow):
         table.cellChanged.connect(self.calculate_Psa)
         table.cellChanged.connect(self.calculate_pressure_after_Psa)
         table.cellChanged.connect(self.calculate_Ga)
+        table.cellChanged.connect(self._set_Ta_in_board)
 
         table.setStyleSheet('QTableWidget { border: 0px solid grey; font-family: Consolas; }')
         table.setMinimumWidth(1562)
@@ -502,7 +503,13 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         if self.current_file_path is None:
-            reply = QMessageBox.question(self, 'Подтверждение', 'Вы уверены, что хотите закрыть программу?\nНе сохраненный расчет будет потерян.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            reply = QMessageBox.question(
+                self,
+                'Подтверждение',
+                '''<html>Вы уверены, что хотите закрыть программу?<br><font color="red">Не сохраненный расчет будет потерян.</font></html>
+                ''',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
 
             if reply == QMessageBox.No:
                 self.save()
@@ -1115,6 +1122,13 @@ class MainWindow(QMainWindow):
             self.board.itemAtPosition(0, 3).widget().setText('')
 
 
+    def _set_Ta_in_board(self, row, column) -> None:
+        if (row, column) == (4, 3):
+            Ta = self.table_1.item(4, 3).text()
+            if Ta:
+                self.board.itemAtPosition(0, 1).widget().setText(Ta)
+            else:
+                self.board.itemAtPosition(0, 1).widget().setText('')
 
 
 
