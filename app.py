@@ -5,7 +5,7 @@ import json
 import platform
 
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QColor, QFont, QIcon, QAction
+from PySide6.QtGui import QColor, QFont, QIcon, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -73,6 +73,15 @@ class MainWindow(QMainWindow):
         save_as_action.triggered.connect(self.save_as)
         about_action.triggered.connect(self.show_about)
         menubar.triggered.connect(self.open_manual)
+
+        save_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.Key.Key_S), self)
+        save_shortcut.activated.connect(self.save)
+
+        save_as_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.SHIFT | Qt.Key.Key_S), self)
+        save_as_shortcut.activated.connect(self.save_as)
+
+        open_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.Key.Key_O), self)
+        open_shortcut.activated.connect(self.open)
 
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
@@ -532,7 +541,6 @@ class MainWindow(QMainWindow):
 
     def open(self) -> None:
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         file_name, _ = QFileDialog.getOpenFileName(self, "Открыть файл", "", "JSON файл (*.json);;Все файлы (*)", options=options)
 
         tables = self.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)
