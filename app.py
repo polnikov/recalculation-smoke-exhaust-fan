@@ -58,21 +58,24 @@ class MainWindow(QMainWindow):
 
         open_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
         open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
+        open_action.setShortcut("Ctrl+O")
         file_menu.addAction(open_action)
 
         save_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
         save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
+        save_action.setShortcut("Ctrl+S")
         file_menu.addAction(save_action)
 
         save_as_action = QAction(CONSTANTS.FILE_SUBMENU[2], self)
         save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
+        save_as_action.setShortcut("Ctrl+Shift+S")
         file_menu.addAction(save_as_action)
 
         open_action.triggered.connect(self.open)
         save_action.triggered.connect(self.save)
         save_as_action.triggered.connect(self.save_as)
         about_action.triggered.connect(self.show_about)
-        menubar.triggered.connect(self.open_manual)
+        manual_action.triggered.connect(self.open_manual)
 
         save_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.Key.Key_S), self)
         save_shortcut.activated.connect(self.save)
