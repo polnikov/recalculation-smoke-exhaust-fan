@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
         open_action.setShortcut("Ctrl+O")
         file_menu.addAction(open_action)
-
+        menubar.addSeparator()
         save_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
         save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
         save_action.setShortcut("Ctrl+S")
@@ -70,6 +70,11 @@ class MainWindow(QMainWindow):
         save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
         save_as_action.setShortcut("Ctrl+Shift+S")
         file_menu.addAction(save_as_action)
+        menubar.addSeparator()
+
+        export_action = QAction(CONSTANTS.FILE_SUBMENU[3], self)
+        export_action.setIcon(QIcon(os.path.join(basedir, 'export.png')))
+        file_menu.addAction(export_action)
 
         open_action.triggered.connect(self.open)
         save_action.triggered.connect(self.save)
