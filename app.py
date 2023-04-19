@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import json
+import platform
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QColor, QFont, QIcon, QAction
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow):
         save_action.triggered.connect(self.save)
         save_as_action.triggered.connect(self.save_as)
         about_action.triggered.connect(self.show_about)
-        # menubar.triggered.connect(self.open_manual)
+        menubar.triggered.connect(self.open_manual)
 
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
@@ -568,6 +569,11 @@ class MainWindow(QMainWindow):
 
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
+
+
+    def open_manual(self):
+        if platform.system() == "Windows":
+            os.startfile(os.path.join(basedir, 'recalculation_smoke_exhaust_fan_manual.pdf'))
 
 
     def show_about(self):
