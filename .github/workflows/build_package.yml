@@ -27,7 +27,7 @@ jobs:
       - name: Move app to exe_packages directory
         run: |
           mkdir -p exe_packages
-          find dist/ -name "*.exe" -type f -exec mv {} exe_packages/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe \;
+          find dist/ -name "*.exe" -type f -exec mv {} "exe_packages/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe" \;
       
       - name: Upload exe to GitHub Releases
         uses: actions/upload-release-asset@v1
