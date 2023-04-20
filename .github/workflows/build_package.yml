@@ -26,9 +26,16 @@ jobs:
 
       - name: Move app to exe_packages directory
         run: |
-          if test -d exe_packages; then echo "Directory exists"; else mkdir exe_packages; fi
+          mkdir -p exe_packages
           mv dist/recalculation-smoke-exhaust-fan.exe exe_packages/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe
-          
+      
+      - name: Upload exe to GitHub Releases
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ github.ref }}/assets{?name,label}
+          asset_path: ./exe_packages/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe
+          asset_name: recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe
+          asset_content_type: application/x-msdownload
 
       - name: Create tag
         if: success()
