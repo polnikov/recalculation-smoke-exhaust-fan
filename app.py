@@ -9,8 +9,8 @@ from datetime import datetime
 from docx.shared import Cm, Pt, Mm
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QColor, QFont, QIcon, QAction, QKeySequence, QShortcut
+from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtGui import QColor, QFont, QIcon, QAction
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -22,7 +22,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QGroupBox,
     QWidget,
-    QTabWidget,
     QTableWidgetItem,
     QScrollArea,
     QSpacerItem,
@@ -50,6 +49,10 @@ class MainWindow(QMainWindow):
         self.groupbox_count = 0
         self.current_file_path = None
         self.box_style = 'QGroupBox::title { color: blue; }'
+        
+        self.auto_save_timer = QTimer()
+        self.auto_save_timer.timeout.connect(self.auto_save)
+        self.auto_save_timer.start(300_000) # 5 minutes in milliseconds
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu(CONSTANTS.MENU[0])
@@ -530,6 +533,13 @@ class MainWindow(QMainWindow):
 
             with open(file_name, 'w') as file:
                 json.dump(data, file)
+
+
+    def auto_save(self) -> None:
+        if self.current_file_path:
+            self.save()
+        else:
+            self.save_as()
 
 
     def export(self) -> None:
