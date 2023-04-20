@@ -27,7 +27,7 @@ jobs:
       - name: Move app to exe_packages directory
         run: |
           if test -d exe_packages; then echo "Directory exists"; else mkdir exe_packages; fi
-          mv home/runner/work/recalculation-smoke-exhaust-fan/recalculation-smoke-exhaust-fan/dist/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe exe_packages/
+          mv dist/recalculation-smoke-exhaust-fan.exe exe_packages/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe
           
 
       - name: Create tag
