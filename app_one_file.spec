@@ -13,11 +13,7 @@ a = Analysis(
     datas=[
         ('app.ico', '.'),
         ('recalculation_smoke_exhaust_fan_manual.pdf', '.'),
-        ('export.png', '.'),
-        ('open.png', '.'),
-        ('save.png', '.'),
-        ('save_as.png', '.'),
-        ('export.png', '.'),
+        ('*.png', '.'),
     ],
     hiddenimports=[],
     hookspath=[],
