@@ -8,7 +8,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('app.ico', '.')],
+    datas=[('app.ico', '.'), ('recalculation_smoke_exhaust_fan_manual.pdf', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
