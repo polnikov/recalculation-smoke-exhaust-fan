@@ -1,0 +1,33 @@
+name: Build and Release EXE version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, 'release')"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build app
+        run: pyinstaller app_one_file.spec
+
+      - name: Move app to exe_packages directory
+        run: mv dist/recalculation-smoke-exhaust-fan_$(date +'%Y.%m.%d').exe exe_packages/
+
+      - name: Create tag
+        run: |
+          git tag "release $(date +'%Y.%m.%d')"
+          git push --tags
