@@ -678,6 +678,29 @@ class MainWindow(QMainWindow):
                         row.cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                         row.cells[j].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
+            result_style = doc.styles.add_style('ResultStyle', 1)
+            result_style.font.name = 'Times New Roman'
+            result_style.font.size = Pt(12)
+            result_style.font.bold = True
+            result = doc.add_paragraph(CONSTANTS.EXPORT.RESULT.TITLE, style='ResultStyle')
+            result.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            result_table = doc.add_table(rows=1, cols=4)
+            result_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+            result_table.style = 'Table Grid'
+
+            widths = [68, 38.5, 38.5, 38.5]
+            header = result_table.rows[0].cells
+            for col in range(4):
+                if col == 2:
+                    header[col].text = data[-1]['result']
+                else:
+                    header[col].text = CONSTANTS.EXPORT.RESULT.DATA[col]
+                if col != 0:
+                    header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+                header[col].width = Mm(widths[col])
+
             now = datetime.now()
             date_time = now.strftime("%d_%m_%y_%H_%M")
             file_name = f'{self.current_file_path}_{date_time}'
@@ -721,6 +744,8 @@ class MainWindow(QMainWindow):
                 case 'default_table':
                     table_data = [table.item(row, 3).text() for row in CONSTANTS.DEFAULT_TABLE.EXPORT_ROWS]
                     data.append({'default_table': table_data})
+        result = self.board.itemAtPosition(0, 3).widget().text()
+        data.append({'result': result})
         return data
 
 
