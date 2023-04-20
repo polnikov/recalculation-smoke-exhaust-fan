@@ -3,7 +3,12 @@ import sys
 import re
 import json
 import platform
+import docx
+from datetime import datetime
 
+from docx.shared import Cm, Pt, Mm
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QColor, QFont, QIcon, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
@@ -55,12 +60,11 @@ class MainWindow(QMainWindow):
         about_action = QAction(CONSTANTS.MENU[2], self)
         menubar.addAction(about_action)
 
-
         open_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
         open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
         open_action.setShortcut("Ctrl+O")
         file_menu.addAction(open_action)
-        menubar.addSeparator()
+        file_menu.addSeparator()
         save_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
         save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
         save_action.setShortcut("Ctrl+S")
@@ -70,7 +74,7 @@ class MainWindow(QMainWindow):
         save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
         save_as_action.setShortcut("Ctrl+Shift+S")
         file_menu.addAction(save_as_action)
-        menubar.addSeparator()
+        file_menu.addSeparator()
 
         export_action = QAction(CONSTANTS.FILE_SUBMENU[3], self)
         export_action.setIcon(QIcon(os.path.join(basedir, 'export.png')))
@@ -79,29 +83,21 @@ class MainWindow(QMainWindow):
         open_action.triggered.connect(self.open)
         save_action.triggered.connect(self.save)
         save_as_action.triggered.connect(self.save_as)
+        export_action.triggered.connect(self.export)
         about_action.triggered.connect(self.show_about)
         manual_action.triggered.connect(self.open_manual)
 
-        save_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.Key.Key_S), self)
-        save_shortcut.activated.connect(self.save)
-
-        save_as_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.SHIFT | Qt.Key.Key_S), self)
-        save_as_shortcut.activated.connect(self.save_as)
-
-        open_shortcut = QShortcut(QKeySequence(Qt.CTRL | Qt.Key.Key_O), self)
-        open_shortcut.activated.connect(self.open)
-
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
-        self.tab_widget = QTabWidget(self)
-        self.setCentralWidget(self.tab_widget)
-        self.tab_widget.addTab(self.create_tab1_content(), CONSTANTS.TAB1_TITLE)
-        self.tab_widget.addTab(self.create_tab2_content(), CONSTANTS.TAB2_TITLE)
+        self.widget = QWidget(self)
+        self.setCentralWidget(self.widget)
+        self.layout = QVBoxLayout(self.widget)
+        self.layout.addWidget(self.create_content())
 
         self.showMaximized()
 
 
-    def create_tab1_content(self) -> object:
+    def create_content(self) -> object:
         _widget = QWidget()
         _widget.setStyleSheet('background-color: #FFFFFF; border: 0')
         _layout = QVBoxLayout(_widget)
@@ -122,17 +118,6 @@ class MainWindow(QMainWindow):
         box_tab1.addWidget(self.create_table_2(), alignment=Qt.AlignmentFlag.AlignCenter)
         box_tab1.addWidget(self.create_default_table(), alignment=Qt.AlignmentFlag.AlignCenter)
         box_tab1.addStretch(1)
-        return _widget
-
-
-    def create_tab2_content(self) -> object:
-        _widget = QWidget()
-        _layout = QVBoxLayout()
-        _hbox1 = QVBoxLayout()
-        # _hbox1.addWidget(self.create_deflector_calculation())
-
-        _layout.addLayout(_hbox1)
-        _widget.setLayout(_layout)
         return _widget
 
 
@@ -195,8 +180,8 @@ class MainWindow(QMainWindow):
 
 
     def create_table_1(self) -> object:
-        t_rows = 10
-        t_cols = 5
+        t_rows = CONSTANTS.TABLE1.ROWS
+        t_cols = CONSTANTS.TABLE1.COLUMNS
 
         self.table_1 = QTableWidget(t_rows, t_cols)
         table = self.table_1
@@ -260,8 +245,8 @@ class MainWindow(QMainWindow):
 
 
     def create_table_2(self) -> object:
-        t_rows = 5
-        t_cols = 5
+        t_rows = CONSTANTS.TABLE2.ROWS
+        t_cols = CONSTANTS.TABLE2.COLUMNS
 
         self.table_2 = QTableWidget(t_rows, t_cols)
         table = self.table_2
@@ -312,15 +297,19 @@ class MainWindow(QMainWindow):
 
     def create_default_table(self) -> object:
         self.groupbox_count += 1
-        _box = QGroupBox(f'Участок {self.groupbox_count}')
+        if self.groupbox_count == 1:
+            _box = QGroupBox('Участок до вентилятора')
+        else:
+            _box = QGroupBox(f'Участок {self.groupbox_count-1}')
+
         _box.setStyleSheet(self.box_style)
         _box.setFont(QFont('Consolas', 12))
         _layout = QVBoxLayout()
         spacer = QSpacerItem(1500, 10)
         _layout.addSpacerItem(spacer)
 
-        t_rows = 14
-        t_cols = 5
+        t_rows = CONSTANTS.DEFAULT_TABLE.ROWS
+        t_cols = CONSTANTS.DEFAULT_TABLE.COLUMNS
 
         self.default_table = QTableWidget(t_rows, t_cols)
         table = self.default_table
@@ -483,70 +472,6 @@ class MainWindow(QMainWindow):
         self._update_result_after_delete_table()
 
 
-    def save(self):
-        if self.current_file_path is None:
-            self.save_as()
-        else:
-            data = self._get_data_for_save()
-            with open(self.current_file_path, 'w') as file:
-                json.dump(data, file)
-
-
-    def save_as(self) -> None:
-        data = self._get_data_for_save()
-        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
-        if file_name:
-            self.current_file_path = file_name
-            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
-
-            with open(file_name, 'w') as file:
-                json.dump(data, file)
-
-
-    def _get_data_for_save(self):
-        data = []
-        tables = self.findChildren(QTableWidget)
-
-        for table in tables:
-            match table.objectName():
-                case 'table_1':
-                    table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.TABLE1]
-                    data.append({'table_1': table_data})
-                case 'table_2':
-                    table_data = [table.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).text()]
-                    data.append({'table_2': table_data})
-                case 'default_table':
-                    table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
-                    data.append({'default_table': table_data})
-        return data
-
-
-    def closeEvent(self, event):
-        if self.current_file_path is None:
-            reply = QMessageBox.question(
-                self,
-                'Подтверждение',
-                '''<html>Вы уверены, что хотите закрыть программу?<br><font color="red">Не сохраненный расчет будет потерян.</font></html>
-                ''',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-            )
-
-            if reply == QMessageBox.No:
-                self.save()
-                event.accept()
-                event.ignore()
-            else:
-                event.accept()
-        else:
-            reply = QMessageBox.question(self, 'Подтверждение', 'Сохранить текущие изменения?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-            if reply == QMessageBox.No:
-                event.accept()
-            else:
-                self.save
-                event.accept()
-
-
     def open(self) -> None:
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(self, "Открыть файл", "", "JSON файл (*.json);;Все файлы (*)", options=options)
@@ -587,12 +512,240 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
 
 
-    def open_manual(self):
+    def save(self) -> None:
+        if self.current_file_path is None:
+            self.save_as()
+        else:
+            data = self._get_data_for_save()
+            with open(self.current_file_path, 'w') as file:
+                json.dump(data, file)
+
+
+    def save_as(self) -> None:
+        data = self._get_data_for_save()
+        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
+        if file_name:
+            self.current_file_path = file_name
+            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
+
+            with open(file_name, 'w') as file:
+                json.dump(data, file)
+
+
+    def export(self) -> None:
+        result = self.board.itemAtPosition(0, 3).widget().text()
+        if result:
+            doc = docx.Document()
+
+            doc_style = doc.styles.add_style('DocStyle', 1)
+            doc_style.font.name = 'Times New Roman'
+            doc_style.font.size = Pt(12)
+            doc.styles['Normal'].base_style = doc_style
+
+            title_style = doc.styles.add_style('TitleStyle', 1)
+            title_style.font.name = 'Times New Roman'
+            title_style.font.size = Pt(14)
+            title_style.font.bold = True
+            title = doc.add_paragraph(CONSTANTS.EXPORT.TITLE, style='TitleStyle')
+            title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            header_style = doc.styles.add_style('HeaderStyle', 1)
+            header_style.font.bold = True
+
+            # setup fields
+            sections = doc.sections
+            for section in sections:
+                section.left_margin = Cm(2.5)
+                section.right_margin = Cm(1)
+                section.top_margin = Cm(1.5)
+                section.bottom_margin = Cm(1.5)
+
+            # add table 1
+            table_1 = doc.add_table(rows=CONSTANTS.TABLE1.ROWS, cols=CONSTANTS.TABLE1.COLUMNS-1)
+            doc.add_paragraph()
+            table_2 = doc.add_table(rows=CONSTANTS.TABLE2.ROWS, cols=CONSTANTS.TABLE2.COLUMNS-1)
+            doc.add_paragraph()
+
+            for t in (table_1, table_2):
+                t.alignment = WD_TABLE_ALIGNMENT.CENTER
+                t.style = 'Table Grid'
+
+            # setup table header and column widths
+            widths = [75, 28, 28, 28]
+            header = table_1.rows[0].cells
+            for col in range(4):
+                header[col].text = CONSTANTS.EXPORT.HEADER[col]
+                header[col].width = Mm(widths[col])
+                header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            columns = table_2.rows[0].cells
+            for col in range(4):
+                columns[col].width = Mm(widths[col])
+                header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            # write headers
+            for i in range(1, CONSTANTS.TABLE1.ROWS):
+                table_1.columns[0].cells[i].text = CONSTANTS.EXPORT.TABLE1.HEADER[i-1]
+                table_1.columns[1].cells[i].text = CONSTANTS.EXPORT.TABLE1.SYMBOLS[i-1]
+                table_1.columns[3].cells[i].text = CONSTANTS.EXPORT.TABLE1.UNITS[i-1]
+            for i in range(CONSTANTS.TABLE2.ROWS):
+                table_2.columns[0].cells[i].text = CONSTANTS.EXPORT.TABLE2.HEADER[i]
+                table_2.columns[1].cells[i].text = CONSTANTS.EXPORT.TABLE2.SYMBOLS[i]
+                table_2.columns[3].cells[i].text = CONSTANTS.EXPORT.TABLE2.UNITS[i]
+
+            # setup table 1 data
+            data = self._get_data_for_export()
+            for i in range(1, CONSTANTS.TABLE1.ROWS):
+                column = table_1.columns[2]
+                column.cells[i].text = data[0]['table_1'][i-1]
+            for i in range(CONSTANTS.TABLE2.ROWS):
+                column = table_2.columns[2]
+                column.cells[i].text = data[1]['table_2'][i]
+
+            # merge table 1 cells
+            for j in (2, 4, 6):
+                a = table_1.cell(j, 0)
+                b = table_1.cell(j+1, 0)
+                a.merge(b)
+                a.text = a.text.strip()
+
+            # setup alignment
+            for row in table_1.rows[1:]:
+                for j in range(1, 4):
+                    row.cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    row.cells[j].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            for row in table_2.rows:
+                for j in range(1, 4):
+                    row.cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    row.cells[j].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            default_style = doc.styles.add_style('DefaultStyle', 1)
+            default_style.font.name = 'Times New Roman'
+            default_style.font.size = Pt(12)
+            default_style.font.bold = True
+
+            default_tables = [d for d in data if 'default_table' in d.keys()]
+            for k in range(len(default_tables)):
+                if k == 0:
+                    title = 'Участок до вентилятора'
+                else:
+                    title = f'Участок {k}'
+                default_title = doc.add_paragraph(title, style='DefaultStyle')
+                default_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                default_table = doc.add_table(rows=3, cols=4)
+                default_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+                default_table.style = 'Table Grid'
+
+                columns = default_table.rows[0].cells
+                for col in range(4):
+                    columns[col].width = Mm(widths[col])
+                    header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+                for i in range(3):
+                    default_table.columns[0].cells[i].text = CONSTANTS.EXPORT.DEFAULT_TABLE.HEADER[i]
+                    default_table.columns[3].cells[i].text = CONSTANTS.EXPORT.DEFAULT_TABLE.UNITS[i]
+
+                    n = len(default_tables)
+                    if k == 0:
+                        default_table.columns[1].cells[i].text = (CONSTANTS.EXPORT.DEFAULT_TABLE.SYMBOLS_0[i])
+                    else:
+                        if i != 2:
+                            default_table.columns[1].cells[i].text = (CONSTANTS.EXPORT.DEFAULT_TABLE.SYMBOLS_N[i] % (n - 1))
+                        else:
+                            default_table.columns[1].cells[i].text = (CONSTANTS.EXPORT.DEFAULT_TABLE.SYMBOLS_N[i] % n)
+
+                # setup data
+                for i in range(3):
+                    column = default_table.columns[2]
+                    column.cells[i].text = default_tables[k]['default_table'][i]
+
+                # setup alignment
+                for row in default_table.rows:
+                    for j in range(1, 4):
+                        row.cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        row.cells[j].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            now = datetime.now()
+            date_time = now.strftime("%d_%m_%y_%H_%M")
+            file_name = f'{self.current_file_path}_{date_time}'
+            file_name = file_name.replace('.json', '')
+            doc.save(f'{file_name}.docx')
+            QMessageBox.information(self, 'Информация', 'Расчёт успешно экспортирован')
+            os.startfile(os.path.join(basedir, f'{file_name}.docx'))
+        else:
+            QMessageBox.critical(self, 'Ошибка', 'Пока что нечего экспортировать')
+
+
+    def _get_data_for_save(self) -> list:
+        data = []
+        tables = self.findChildren(QTableWidget)
+
+        for table in tables:
+            match table.objectName():
+                case 'table_1':
+                    table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.TABLE1]
+                    data.append({'table_1': table_data})
+                case 'table_2':
+                    table_data = [table.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).text()]
+                    data.append({'table_2': table_data})
+                case 'default_table':
+                    table_data = [table.item(row, 3).text() for row in CONSTANTS.SAVE_OPEN.DEFAULT_TABLE]
+                    data.append({'default_table': table_data})
+        return data
+
+
+    def _get_data_for_export(self) -> list:
+        data = []
+        tables = self.findChildren(QTableWidget)
+        for table in tables:
+            match table.objectName():
+                case 'table_1':
+                    table_data = [table.item(row, 3).text() for row in range(CONSTANTS.TABLE1.ROWS)]
+                    data.append({'table_1': table_data})
+                case 'table_2':
+                    table_data = [table.item(row, 3).text() for row in range(CONSTANTS.TABLE2.ROWS)]
+                    data.append({'table_2': table_data})
+                case 'default_table':
+                    table_data = [table.item(row, 3).text() for row in CONSTANTS.DEFAULT_TABLE.EXPORT_ROWS]
+                    data.append({'default_table': table_data})
+        return data
+
+
+    def closeEvent(self, event) -> None:
+        if self.current_file_path is None:
+            reply = QMessageBox.question(
+                self,
+                'Подтверждение',
+                '''<html>Вы уверены, что хотите закрыть программу?<br><font color="red">Не сохраненный расчет будет потерян.</font></html>
+                ''',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
+
+            if reply == QMessageBox.No:
+                self.save()
+                event.accept()
+                event.ignore()
+            else:
+                event.accept()
+        else:
+            reply = QMessageBox.question(self, 'Подтверждение', 'Сохранить текущие изменения?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                event.accept()
+            else:
+                self.save
+                event.accept()
+
+
+    def open_manual(self) -> None:
         if platform.system() == "Windows":
             os.startfile(os.path.join(basedir, 'recalculation_smoke_exhaust_fan_manual.pdf'))
 
 
-    def show_about(self):
+    def show_about(self) -> None:
         QMessageBox.information(self, "О программе", CONSTANTS.ABOUT)
 
 
