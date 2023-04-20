@@ -9,6 +9,7 @@
 - Python 3.10.6
 - PySide6 6.5.0
 - pyinstaller 5.9.0
+- python-docx 0.8.11
 
 ### **Interface**
 ![Main tab](/docs/img/main_window.png)
