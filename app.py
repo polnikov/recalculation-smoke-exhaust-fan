@@ -41,11 +41,15 @@ try:
 except ImportError:
     pass
 
+now = datetime.now()
+version = now.strftime("%Y.%m.%d")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(CONSTANTS.APP_TITLE)
+        self.app_title = f'{CONSTANTS.APP_TITLE}_{version}'
+        self.setWindowTitle(self.app_title)
         self.groupbox_count = 0
         self.current_file_path = None
         self.box_style = 'QGroupBox::title { color: blue; }'
@@ -509,7 +513,7 @@ class MainWindow(QMainWindow):
                             table.item(row, 3).setText(data[t]['default_table'][n])
                     self._update_num_tables()
                 self.current_file_path = file_name
-                self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
+                self.setWindowTitle(f'{self.app_title} | {file_name}')
 
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
@@ -529,7 +533,7 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
         if file_name:
             self.current_file_path = file_name
-            self.setWindowTitle(f'{CONSTANTS.APP_TITLE} | {file_name}')
+            self.setWindowTitle(f'{self.app_title} | {file_name}')
 
             with open(file_name, 'w') as file:
                 json.dump(data, file)
