@@ -25,6 +25,11 @@ class CONSTANTS:
     class BUTTONS:
         ADD = 'Добавить\nучасток'
         DELETE = 'Удалить\nучасток'
+        TOOLTIPS = (
+            'Копировать последнюю\nтаблицу',
+            'Добавить таблицу',
+            'Удалить таблицу',
+        )
 
 
     class TABLE1:

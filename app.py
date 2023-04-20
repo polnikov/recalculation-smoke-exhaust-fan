@@ -132,7 +132,6 @@ class MainWindow(QMainWindow):
         _widget = QWidget()
         _widget.setStyleSheet('background-color: white; ')
         _layout = QGridLayout()
-        _layout.setHorizontalSpacing(12)
         self.board = _layout
 
         labels = CONSTANTS.BOARD.LABELS
@@ -163,24 +162,36 @@ class MainWindow(QMainWindow):
                 label.setText('1')
                 label.setStyleSheet('QLabel { border-radius: 20px; background-color: #EFEFEF; color: red }')
 
+        self.copy_button = QPushButton()
+        copy_button = self.copy_button
+        copy_button.setFixedSize(50, 50)
+        copy_button.setIcon(QIcon(os.path.join(basedir, 'copy.png')))
+        copy_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99CCFF }')
+        copy_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[0])
+
+        copy_button.clicked.connect(self.copy_table)
+
         self.add_button = QPushButton()
         add_button = self.add_button
-        add_button.setFixedSize(80, 50)
-        add_button.setText(CONSTANTS.BUTTONS.ADD)
-        add_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { background-color: #66CC00; }')
+        add_button.setFixedSize(50, 50)
+        add_button.setIcon(QIcon(os.path.join(basedir, 'add.png')))
+        add_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99FF99 }')
+        add_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[1])
 
         add_button.clicked.connect(self.add_table)
 
         self.delete_button = QPushButton()
         delete_button = self.delete_button
-        delete_button.setFixedSize(80, 50)
-        delete_button.setText(CONSTANTS.BUTTONS.DELETE)
-        delete_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { background-color: #FF6666; }')
+        delete_button.setFixedSize(50, 50)
+        delete_button.setIcon(QIcon(os.path.join(basedir, 'delete.png')))
+        delete_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #FF9999 }')
+        delete_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[2])
 
         delete_button.clicked.connect(self.delete_table)
 
-        _layout.addWidget(delete_button, 0, 6)
-        _layout.addWidget(add_button, 0, 7)
+        _layout.addWidget(copy_button, 0, 6)
+        _layout.addWidget(delete_button, 0, 7)
+        _layout.addWidget(add_button, 0, 8)
 
         _widget.setLayout(_layout)
         return _widget
@@ -477,6 +488,18 @@ class MainWindow(QMainWindow):
             self.groupbox_count -= 1
             self._update_num_tables()
         self._update_result_after_delete_table()
+
+
+    def copy_table(self) -> None:
+        last_table = self.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)[-1]
+        data = [last_table.item(row, 3).text() for row in CONSTANTS.DEFAULT_TABLE.EDITABLE_ROWS]
+        if all(data):
+            self.add_table()
+            last_table = self.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)[-1]
+            for i, row in enumerate(CONSTANTS.DEFAULT_TABLE.EDITABLE_ROWS):
+                last_table.item(row, 3).setText(data[i])
+        else:
+            QMessageBox.information(self, "Информация", 'Чтобы скопировать таблицу, её нужно заполнить.')
 
 
     def open(self) -> None:
