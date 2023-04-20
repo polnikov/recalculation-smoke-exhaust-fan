@@ -3,6 +3,8 @@
 
 block_cipher = None
 
+import datetime
+version = datetime.date.today().strftime("%Y.%m.%d")
 
 a = Analysis(
     ['app.py'],
@@ -26,7 +28,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='recalculation-smoke-exhaust-fan',
+    name=f'recalculation-smoke-exhaust-fan_{version}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -37,7 +39,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app.ico'
+    icon='app.ico',
 )
 coll = COLLECT(
     exe,
