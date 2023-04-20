@@ -11,4 +11,4 @@
 - pyinstaller 5.9.0
 
 ### **Interface**
-![Main tab](/docs/img/main_tab.png)
+![Main tab](/docs/img/main_window.png)
