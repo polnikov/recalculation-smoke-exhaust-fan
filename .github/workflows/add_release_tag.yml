@@ -22,7 +22,7 @@ jobs:
     - name: Create tag
       if: steps.changes.outputs.src == 'true'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
       run: |
         git tag "release/$(date +'%Y.%m.%d')"
-        git push --tags https://oauth2:${GITHUB_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
+        git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
