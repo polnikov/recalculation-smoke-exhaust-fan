@@ -3,8 +3,7 @@
 
 block_cipher = None
 
-import datetime
-version = datetime.date.today().strftime("%Y.%m.%d")
+version = 'v1.0.0'
 
 a = Analysis(
     ['app.py'],
@@ -34,7 +33,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name=f'recalculation-smoke-exhaust-fan_v{version}',
+    name=f'recalculation-smoke-exhaust-fan_{version}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

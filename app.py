@@ -4,6 +4,7 @@ import re
 import json
 import platform
 import docx
+import requests
 from datetime import datetime
 
 from docx.shared import Cm, Pt, Mm
@@ -41,14 +42,13 @@ try:
 except ImportError:
     pass
 
-now = datetime.now()
-version = now.strftime("%Y.%m.%d")
+version = 'v1.0.0'
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.app_title = f'{CONSTANTS.APP_TITLE}_v{version}'
+        self.app_title = f'{CONSTANTS.APP_TITLE}_{version}'
         self.setWindowTitle(self.app_title)
         self.groupbox_count = 0
         self.current_file_path = None
@@ -1343,6 +1343,12 @@ class MainWindow(QMainWindow):
                 self.board.itemAtPosition(0, 1).widget().setText('-')
 
 
+    def check_updates(self) -> None:
+        url = 'https://api.github.com/repos/polnikov/recalculation-smoke-exhaust-fan/releases/latest'
+        response = requests.get(url)
+        data = response.json()
+        latest_version = data['tag_name']
+        print(latest_version)
 
 
 
