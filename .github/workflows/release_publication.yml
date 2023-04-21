@@ -36,6 +36,7 @@ jobs:
   creating-upload-release:
     needs: [creating-tag]
     runs-on: ubuntu-latest
+    steps:
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
