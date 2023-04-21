@@ -36,6 +36,7 @@ jobs:
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
+        id: create_release
         uses: actions/create-release@v1
         with:
           tag_name: ${{ env.TAG_NAME }}
@@ -47,7 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
 
       - name: Upload Asset
-        if: steps.create_release.outputs.id != ''
+        if: steps.create_release.outcome == 'success'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
