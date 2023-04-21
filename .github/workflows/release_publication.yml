@@ -52,6 +52,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./exe_packages/recalculation-of-the-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
-          asset_name: recalculation-of-the-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
+          asset_path: ./exe_packages/recalculation-smoke-exhaust-fan__${{ env.TAG_NAME }}.exe
+          asset_name: recalculation-smoke-exhaust-fan__${{ env.TAG_NAME }}.exe
           asset_content_type: application/x-msdownload
