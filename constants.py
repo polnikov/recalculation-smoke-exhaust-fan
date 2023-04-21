@@ -30,6 +30,16 @@ class CONSTANTS:
             'Добавить таблицу',
             'Удалить таблицу',
         )
+        ICONS = (
+            'copy.png',
+            'add.png',
+            'delete.png',
+        )
+        STYLES = (
+            'QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99CCFF }',
+            'QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99FF99 }',
+            'QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #FF9999 }',
+        )
 
 
     class TABLE1:

@@ -118,8 +118,8 @@ class MainWindow(QMainWindow):
         scroll_widget = QWidget(scroll_area)
         scroll_area.setWidget(scroll_widget)
 
-        self.box_tab1 = QVBoxLayout(scroll_widget)
-        box_tab1 = self.box_tab1
+        self.box_content = QVBoxLayout(scroll_widget)
+        box_tab1 = self.box_content
         box_tab1.addStretch(1)
         box_tab1.addWidget(self.create_table_1(), alignment=Qt.AlignmentFlag.AlignCenter)
         box_tab1.addWidget(self.create_table_2(), alignment=Qt.AlignmentFlag.AlignCenter)
@@ -162,36 +162,19 @@ class MainWindow(QMainWindow):
                 label.setText('1')
                 label.setStyleSheet('QLabel { border-radius: 20px; background-color: #EFEFEF; color: red }')
 
-        self.copy_button = QPushButton()
-        copy_button = self.copy_button
-        copy_button.setFixedSize(50, 50)
-        copy_button.setIcon(QIcon(os.path.join(basedir, 'copy.png')))
-        copy_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99CCFF }')
-        copy_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[0])
-
-        copy_button.clicked.connect(self.copy_table)
-
-        self.add_button = QPushButton()
-        add_button = self.add_button
-        add_button.setFixedSize(50, 50)
-        add_button.setIcon(QIcon(os.path.join(basedir, 'add.png')))
-        add_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #99FF99 }')
-        add_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[1])
-
-        add_button.clicked.connect(self.add_table)
-
-        self.delete_button = QPushButton()
-        delete_button = self.delete_button
-        delete_button.setFixedSize(50, 50)
-        delete_button.setIcon(QIcon(os.path.join(basedir, 'delete.png')))
-        delete_button.setStyleSheet('QPushButton { border-radius: 20px; background-color: #EFEFEF; } QPushButton:hover { border: 2px solid grey; background-color: #FF9999 }')
-        delete_button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[2])
-
-        delete_button.clicked.connect(self.delete_table)
-
-        _layout.addWidget(copy_button, 0, 6)
-        _layout.addWidget(delete_button, 0, 7)
-        _layout.addWidget(add_button, 0, 8)
+        BUTTONS_HANDLERS = (
+            self.copy_table,
+            self.add_table,
+            self.delete_table
+        )
+        for b in range(3):
+            button = QPushButton()
+            button.setFixedSize(50, 50)
+            button.setIcon(QIcon(CONSTANTS.BUTTONS.ICONS[b]))
+            button.setStyleSheet(CONSTANTS.BUTTONS.STYLES[b])
+            button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[b])
+            button.clicked.connect(BUTTONS_HANDLERS[b])
+            _layout.addWidget(button, 0, b+6)
 
         _widget.setLayout(_layout)
         return _widget
@@ -474,8 +457,8 @@ class MainWindow(QMainWindow):
 
     def add_table(self):
         new_table = self.create_default_table()
-        self.box_tab1.addWidget(new_table, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.box_tab1.addStretch(1)
+        self.box_content.addWidget(new_table, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.box_content.addStretch(1)
         self._update_num_tables()
 
 
@@ -529,8 +512,8 @@ class MainWindow(QMainWindow):
 
                     for t in range(3, len(data)):
                         box = self.create_default_table()
-                        self.box_tab1.addWidget(box, alignment=Qt.AlignmentFlag.AlignCenter)
-                        self.box_tab1.addStretch(1)
+                        self.box_content.addWidget(box, alignment=Qt.AlignmentFlag.AlignCenter)
+                        self.box_content.addStretch(1)
                         table = box.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)[0]
                         for n, row in enumerate(CONSTANTS.SAVE_OPEN.DEFAULT_TABLE):
                             table.item(row, 3).setText(data[t]['default_table'][n])
@@ -1007,7 +990,6 @@ class MainWindow(QMainWindow):
         if item.row() in (4, 5):
             sender = self.sender()
             table = self._get_default_table_index_nums(sender)[0]
-
             a_n = table.item(4, 3).text()
             b_n = table.item(5, 3).text()
             if all([a_n, b_n]):
@@ -1027,7 +1009,6 @@ class MainWindow(QMainWindow):
         if item.row() in (10, 11):
             sender = self.sender()
             table = self._get_default_table_index_nums(sender)[0]
-
             a_dpn = table.item(10, 3).text()
             b_dpn = table.item(11, 3).text()
             if all([a_dpn, b_dpn]):
