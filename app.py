@@ -42,13 +42,13 @@ try:
 except ImportError:
     pass
 
-version = 'v1.0.0'
+version = '1.0.0'
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.app_title = f'{CONSTANTS.APP_TITLE}_{version}'
+        self.app_title = f'{CONSTANTS.APP_TITLE}_v{version}'
         self.setWindowTitle(self.app_title)
         self.groupbox_count = 0
         self.current_file_path = None
