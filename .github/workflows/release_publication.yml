@@ -8,10 +8,6 @@ on:
 jobs:
   creating-tag:
     runs-on: ubuntu-latest
-    env:
-      TAG_NAME: v$(date +'%Y.%m.%d')
-    outputs:
-      tag_name: ${{ env.TAG_NAME }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -26,22 +22,27 @@ jobs:
 
       - name: Create Tag
         if: steps.check_changes.outputs.src == 'true'
+        id: create_tag
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
           git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
+          echo "TAG_NAME1:v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
+          echo "TAG_NAME2='$(v$(date +'%Y.%m.%d'))'" >> $GITHUB_ENV
+      - name: Check tag name
+        run: |
+          echo "Calling var from env using env context: ${{ env.TAG_NAME1 }}"
+          echo "Calling var from env using env context: ${{ env.TAG_NAME2 }}"
+          echo "Calling var from env: $TAG_NAME1"
+          echo "Calling var from env: $TAG_NAME2"
 
-  creating-upload-release:
-    needs: [creating-tag]
-    runs-on: ubuntu-latest
-    steps:
       - name: Create Release
-        id: create_release
+        if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ creating-tag.outputs.tag_name }}
-          release_name: "Release ${{ creating-tag.outputs.tag_name }}"
+          tag_name: ${{ steps.create_tag.outputs.tag_name }}
+          release_name: "Release ${{ steps.create_tag.outputs.tag_name }}"
           body_path: ./release_info.md
           draft: false
           prerelease: false
