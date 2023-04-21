@@ -26,11 +26,11 @@ jobs:
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
-          TAG_NAME="release/v$(date +'%Y.%m.%d')"
+          export TAG_NAME="release/v$(date +'%Y.%m.%d')"
           git tag $TAG_NAME
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
         outputs:
-          tag_name: ${{ TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
