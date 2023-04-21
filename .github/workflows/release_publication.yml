@@ -6,10 +6,12 @@ on:
       - main
 
 jobs:
-  release-exe-file:
+  creating-tag:
     runs-on: ubuntu-latest
     env:
       TAG_NAME: v$(date +'%Y.%m.%d')
+    outputs:
+      tag_name: ${{ env.TAG_NAME }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -30,15 +32,16 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-        outputs:
-          tag_name: ${{ env.TAG_NAME }}
 
+  creating-upload-release:
+    needs: [creating-tag]
+    runs-on: ubuntu-latest
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.create_tag.outputs.tag_name }}
-          release_name: "Release ${{ steps.create_tag.outputs.tag_name }}"
+          tag_name: ${{ creating-tag.outputs.tag_name }}
+          release_name: "Release ${{ creating-tag.outputs.tag_name }}"
           body_path: ./release_info.md
           draft: false
           prerelease: false
