@@ -1,0 +1,28 @@
+name: Add tag on release EXE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  add_tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Push Pull Request Filter
+      uses: "marvinpinto/action-push-pull-request-filter@v2.2.0"
+      id: filter
+      with:
+        files: 'exe_packages/**'
+        ignore: |
+          *.md
+          *.txt
+          *.yml
+
+    - name: Create tag
+      if: steps.filter.outputs.matched == 'true'
+      run: |
+        git tag "release $(date +'%Y.%m.%d')"
+        git push --tags
