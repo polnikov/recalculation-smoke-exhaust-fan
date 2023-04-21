@@ -48,7 +48,7 @@ version = now.strftime("%Y.%m.%d")
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.app_title = f'{CONSTANTS.APP_TITLE}_{version}'
+        self.app_title = f'{CONSTANTS.APP_TITLE}_v{version}'
         self.setWindowTitle(self.app_title)
         self.groupbox_count = 0
         self.current_file_path = None
@@ -63,36 +63,26 @@ class MainWindow(QMainWindow):
 
         manual_action = QAction(CONSTANTS.MENU[1], self)
         menubar.addAction(manual_action)
+        manual_action.triggered.connect(self.open_manual)
 
         about_action = QAction(CONSTANTS.MENU[2], self)
         menubar.addAction(about_action)
-
-        open_action = QAction(CONSTANTS.FILE_SUBMENU[0], self)
-        open_action.setIcon(QIcon(os.path.join(basedir, 'open.png')))
-        open_action.setShortcut("Ctrl+O")
-        file_menu.addAction(open_action)
-        file_menu.addSeparator()
-        save_action = QAction(CONSTANTS.FILE_SUBMENU[1], self)
-        save_action.setIcon(QIcon(os.path.join(basedir, 'save.png')))
-        save_action.setShortcut("Ctrl+S")
-        file_menu.addAction(save_action)
-
-        save_as_action = QAction(CONSTANTS.FILE_SUBMENU[2], self)
-        save_as_action.setIcon(QIcon(os.path.join(basedir, 'save_as.png')))
-        save_as_action.setShortcut("Ctrl+Shift+S")
-        file_menu.addAction(save_as_action)
-        file_menu.addSeparator()
-
-        export_action = QAction(CONSTANTS.FILE_SUBMENU[3], self)
-        export_action.setIcon(QIcon(os.path.join(basedir, 'export.png')))
-        file_menu.addAction(export_action)
-
-        open_action.triggered.connect(self.open)
-        save_action.triggered.connect(self.save)
-        save_as_action.triggered.connect(self.save_as)
-        export_action.triggered.connect(self.export)
         about_action.triggered.connect(self.show_about)
-        manual_action.triggered.connect(self.open_manual)
+
+        FILE_MENU_HANDLERS = (
+            self.open,
+            self.save,
+            self.save_as,
+            self.export,
+        )
+        for m in range(4):
+            action = QAction(CONSTANTS.FILE_SUBMENU[m], self)
+            action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.MENU_ICONS[m])))
+            action.setShortcut(CONSTANTS.MENU_SHORTCUTS[m])
+            file_menu.addAction(action)
+            action.triggered.connect(FILE_MENU_HANDLERS[m])
+            if m in (0, 2):
+                file_menu.addSeparator()
 
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 

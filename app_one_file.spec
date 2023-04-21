@@ -13,7 +13,7 @@ a = Analysis(
     datas=[
         ('app.ico', '.'),
         ('recalculation_smoke_exhaust_fan_manual.pdf', '.'),
-        ('*.png', '.'),
+        ('icons/*.png', 'icons'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -34,7 +34,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name=f'recalculation-smoke-exhaust-fan_{version}',
+    name=f'recalculation-smoke-exhaust-fan_v{version}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

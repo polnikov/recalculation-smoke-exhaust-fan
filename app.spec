@@ -28,7 +28,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name=f'recalculation-smoke-exhaust-fan_{version}',
+    name=f'recalculation-smoke-exhaust-fan_v{version}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
