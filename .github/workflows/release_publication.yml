@@ -55,3 +55,5 @@ jobs:
           asset_path: ./exe_packages/recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
           asset_name: recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
           asset_content_type: application/x-msdownload
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
