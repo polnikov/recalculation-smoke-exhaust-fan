@@ -12,7 +12,8 @@ jobs:
       - name: Get App Version
         id: get_version
         run: |
-          "TAG_NAME=$(grep -o 'version = "v*"' app.py | cut -d '"' -f2)"" >> $GITHUB_ENV
+          TAG_NAME=$(grep -o 'version = "v*"' app.py | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo "Tag name: $TAG_NAME"
           echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
         env:
           GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
