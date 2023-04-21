@@ -9,20 +9,10 @@ jobs:
   creating-tag:
     runs-on: ubuntu-latest
     steps:
-      - name: Get App Version
-        id: get_version
-        run: |
-          TAG_NAME=$(grep -o 'version = ".*"' app.py | cut -d '"' -f2)
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
-
       - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Check changes
-        if: steps.get_version.outcome == 'success'
         id: check_changes
         uses: dorny/paths-filter@v2
         with:
@@ -30,8 +20,18 @@ jobs:
             src:
               - 'exe_packages/**'
 
-      - name: Create Tag
+      - name: Get App Version
         if: steps.check_changes.outputs.src == 'true'
+        id: get_version
+        run: |
+          TAG_NAME=$(grep -o "version = '.*'" app.py | cut -d '"' -f2)
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
+
+      - name: Create Tag
+        if: steps.get_version.outcome == 'success'
         id: create_tag
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
