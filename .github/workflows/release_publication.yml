@@ -30,7 +30,7 @@ jobs:
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
 
       - name: Create Release
-        if: ${{ steps.create_tag.outputs.src == 'true' }}
+        if: ${{ steps.create_tag.outputs.src == 'success' }}
         id: create_release
         run: |
           release_name="Release $TAG_NAME"
