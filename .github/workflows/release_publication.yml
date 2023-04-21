@@ -28,7 +28,7 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-          echo "TAG_NAME=$(v$(date +'%Y.%m.%d'))" >> $GITHUB_ENV
+          echo "TAG_NAME=v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
       - name: Check tag name
         run: |
           echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
