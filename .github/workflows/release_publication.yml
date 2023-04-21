@@ -15,7 +15,6 @@ jobs:
       - name: Check changes
         id: check_changes
         uses: dorny/paths-filter@v3
-        id: changes
         with:
           filters: |
             src:
@@ -35,15 +34,15 @@ jobs:
         id: create_release
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
         run: |
           release_name="Release $TAG_NAME"
           body=$(cat release_info.md)
           echo "::set-env name=RELEASE_NAME::$release_name"
           echo "::set-env name=BODY::$body"
           hub release create -m "${{ env.RELEASE_NAME }}" -m "${{ env.BODY }}" $TAG_NAME
-        with:
-          draft: false
-          prerelease: false
 
       - name: Upload Asset
         if: steps.create_release.outputs.id != ''
