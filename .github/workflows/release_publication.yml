@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  release-exe-file:
+  checking-changes:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,29 +20,31 @@ jobs:
             src:
               - 'exe_packages/**'
 
-      - name: Create Tag
-        if: steps.check_changes.outputs.src == 'true'
-        id: create_tag
-        env:
-          TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
-        run: |
-          git tag "release/v$(date +'%Y.%m.%d')"
-          git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
+  creating-tag:
+    needs: checking-changes
+    - name: Create Tag
+      env:
+        TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
+      run: |
+        git tag "release/v$(date +'%Y.%m.%d')"
+        git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
 
-      - name: Create Release
-        if: ${{ steps.create_tag.outputs.src == 'success' }}
-        id: create_release
-        run: |
-          release_name="Release $TAG_NAME"
-          body=$(cat release_info.md)
-          echo "::set-env name=RELEASE_NAME::$release_name"
-          echo "::set-env name=BODY::$body"
-          hub release create -m "${{ env.RELEASE_NAME }}" -m "${{ env.BODY }}" $TAG_NAME
+  creating-release:
+    needs: creating-tag
+    - name: Create Release
+      run: |
+        release_name="Release $TAG_NAME"
+        body=$(cat release_info.md)
+        echo "::set-env name=RELEASE_NAME::$release_name"
+        echo "::set-env name=BODY::$body"
+        hub release create -m "${{ env.RELEASE_NAME }}" -m "${{ env.BODY }}" $TAG_NAME
 
-      - name: Upload Asset
-        if: steps.create_release.outputs.id != ''
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./exe_packages/recalculation-of-the-smoke-exhaust-fan_${{ github.ref }}.exe
-          asset_name: recalculation-of-the-smoke-exhaust-fan_${{ github.ref }}.exe
+  uploading-asset:
+    needs: creating-release
+    - name: Upload Asset
+      if: steps.create_release.outputs.id != ''
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./exe_packages/recalculation-of-the-smoke-exhaust-fan_${{ github.ref }}.exe
+        asset_name: recalculation-of-the-smoke-exhaust-fan_${{ github.ref }}.exe
