@@ -28,14 +28,14 @@ jobs:
         run: |
           git tag "release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-          echo "release/v$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+          echo "::set-env name=VERSION::$(date +'%Y.%m.%d')"
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
         with:
           tag_name: $GITHUB_OUTPUT
-          release_name: "Release $GITHUB_OUTPUT"
+          release_name: "Release $VERSION"
           body_path: ./release_info.md
           draft: false
           prerelease: false
