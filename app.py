@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
         for b in range(3):
             button = QPushButton()
             button.setFixedSize(50, 50)
-            button.setIcon(QIcon(CONSTANTS.BUTTONS.ICONS[b]))
+            button.setIcon(QIcon(os.path.join(basedir, CONSTANTS.BUTTONS.ICONS[b])))
             button.setStyleSheet(CONSTANTS.BUTTONS.STYLES[b])
             button.setToolTip(CONSTANTS.BUTTONS.TOOLTIPS[b])
             button.clicked.connect(BUTTONS_HANDLERS[b])
