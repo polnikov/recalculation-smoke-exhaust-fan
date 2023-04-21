@@ -32,11 +32,6 @@ jobs:
       - name: Create Release
         if: ${{ steps.create_tag.outputs.src == 'true' }}
         id: create_release
-        env:
-          TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
-        with:
-          draft: false
-          prerelease: false
         run: |
           release_name="Release $TAG_NAME"
           body=$(cat release_info.md)
