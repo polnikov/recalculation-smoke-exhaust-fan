@@ -23,14 +23,13 @@ jobs:
       - name: Create Tag
         if: steps.check_changes.outputs.src == 'true'
         id: create_tag
+        outputs:
+          tag_name: "release/v$(date +'%Y.%m.%d')"
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
           git tag "release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-        outputs:
-          tag_name:
-            value: "release/v$(date +'%Y.%m.%d')"
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
