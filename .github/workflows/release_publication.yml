@@ -28,14 +28,14 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-          echo "TAG_NAME1:v$(date +'%Y.%m.%d')" >> $GITHUB_ENV
-          echo "TAG_NAME2='$(v$(date +'%Y.%m.%d'))'" >> $GITHUB_ENV
+          echo "TAG_NAME_1:$(v$(date + '%Y.%m.%d'))" >> $GITHUB_ENV
+          echo "TAG_NAME_2='$(v$(date +'%Y.%m.%d'))'" >> $GITHUB_ENV
       - name: Check tag name
         run: |
-          echo "Calling var from env using env context: ${{ env.TAG_NAME1 }}"
-          echo "Calling var from env using env context: ${{ env.TAG_NAME2 }}"
-          echo "Calling var from env: $TAG_NAME1"
-          echo "Calling var from env: $TAG_NAME2"
+          echo "Calling var from env using env context: ${{ env.TAG_NAME_1 }}"
+          echo "Calling var from env using env context: ${{ env.TAG_NAME_2 }}"
+          echo "Calling var from env: $TAG_NAME_1"
+          echo "Calling var from env: $TAG_NAME_2"
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
