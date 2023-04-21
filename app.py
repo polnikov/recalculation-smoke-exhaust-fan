@@ -36,7 +36,7 @@ basedir = os.path.dirname(__file__)
 
 try:
     from ctypes import windll  # Only exists on Windows.
-    myappid = 'akudjatechnology.Recalculation-of-the-smoke-exhaust-fan.1.0.0'
+    myappid = 'akudjatechnology.Recalculation-of-the-smoke-exhaust-fan'
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
