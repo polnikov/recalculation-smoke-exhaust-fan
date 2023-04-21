@@ -20,7 +20,7 @@ jobs:
             - 'exe_packages/**'
 
     - name: Create tag
-      if: ${{ steps.changes.outputs.any_changed == 'true' }}
+      if: ${{ success() }}
       run: |
-        git tag "release $(date +'%Y.%m.%d')"
+        git tag "release $(date +`%Y.%m.%d`)"
         git push --tags
