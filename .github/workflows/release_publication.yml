@@ -28,7 +28,7 @@ jobs:
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
-          git tag $TAG_NAME
+          git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
 
       - name: Create Release
