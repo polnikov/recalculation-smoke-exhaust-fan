@@ -28,7 +28,7 @@ jobs:
         run: |
           git tag "release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-          echo "::set-env name=VERSION::$(date +'%Y.%m.%d')"
+          echo "v$(date +'%Y.%m.%d')" >> $VERSION
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
