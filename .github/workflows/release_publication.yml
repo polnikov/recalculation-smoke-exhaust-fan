@@ -28,7 +28,7 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }}
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-          echo "TAG_NAME='$(v$(date +'%Y.%m.%d'))'" >> $GITHUB_ENV
+          echo "TAG_NAME=$(v$(date +'%Y.%m.%d'))" >> $GITHUB_ENV
       - name: Check tag name
         run: |
           echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
@@ -38,8 +38,8 @@ jobs:
         if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.create_tag.outputs.tag_name }}
-          release_name: "Release ${{ steps.create_tag.outputs.tag_name }}"
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: "Release ${{ env.TAG_NAME }}"
           body_path: ./release_info.md
           draft: false
           prerelease: false
