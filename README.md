@@ -1,5 +1,5 @@
 ## The program for recalculating smoke exhaust fan (smoke exhaust system)
-[![CodeQL](https://github.com/polnikov/recalculation-smoke-exhaust-fan/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/polnikov/recalculation-smoke-exhaust-fan/actions/workflows/codeql-analysis.yml) [![release](https://img.shields.io/github/v/release/polnikov/recalculation-smoke-exhaust-fan)]()
+[![CodeQL](https://github.com/polnikov/recalculation-smoke-exhaust-fan/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/polnikov/recalculation-smoke-exhaust-fan/actions/workflows/codeql-analysis.yml) [![release](https://img.shields.io/github/v/release/polnikov/recalculation-smoke-exhaust-fan)](https://github.com/polnikov/recalculation-smoke-exhaust-fan/releases)
 
 
 Программа пересчёта расхода воздуха для испытаний противодымной вентиляции по ГОСТ 53300-2009 (приложение Б)
