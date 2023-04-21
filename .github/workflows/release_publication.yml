@@ -29,15 +29,15 @@ jobs:
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
-          git tag "release/v$(date +'%Y.%m.%d')"
+          git tag "Release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
         uses: actions/create-release@v1
         with:
-          tag_name: $VERSION
-          release_name: "Release $VERSION"
+          tag_name: "Release ${{ env.VERSION }}"
+          release_name: "Release ${{ env.VERSION }}"
           body_path: ./release_info.md
           draft: false
           prerelease: false
