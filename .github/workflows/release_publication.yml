@@ -30,14 +30,16 @@ jobs:
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
 
       - name: Create Release
-        if: ${{ steps.create_tag.outcome == 'success' }}
-        id: create_release
-        run: |
-          release_name="Release $TAG_NAME"
-          body=$(cat release_info.md)
-          echo "::set-env name=RELEASE_NAME::$release_name"
-          echo "::set-env name=BODY::$body"
-          hub release create -m "${{ env.RELEASE_NAME }}" -m "${{ env.BODY }}" $TAG_NAME
+        if: steps.create_tag.outputs.src == 'true'
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.create_tag.outputs.tag_name }}
+          release_name: "Release ${{ steps.create_tag.outputs.tag_name }}"
+          body_path: ./release_info.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
 
       - name: Upload Asset
         if: steps.create_release.outputs.id != ''
