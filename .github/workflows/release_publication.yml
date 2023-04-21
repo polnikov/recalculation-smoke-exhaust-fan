@@ -30,7 +30,8 @@ jobs:
           git tag $TAG_NAME
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
         outputs:
-          tag_name: ${{ env.TAG_NAME }}
+          output:
+            tag_name: ${{ env.TAG_NAME }}
 
       - name: Create Release
         if: steps.create_tag.outcome == 'success'
