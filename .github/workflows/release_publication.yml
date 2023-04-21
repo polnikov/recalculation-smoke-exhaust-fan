@@ -22,6 +22,7 @@ jobs:
 
   creating-tag:
     needs: checking-changes
+    runs-on: ubuntu-latest
     steps:
       - name: Create Tag
         env:
@@ -32,6 +33,7 @@ jobs:
 
   creating-release:
     needs: [creating-tag, checking-changes]
+    runs-on: ubuntu-latest
     steps:
       - name: Create Release
         run: |
@@ -43,6 +45,7 @@ jobs:
 
   uploading-asset:
     needs: [creating-tag, checking-changes, creating-release]
+    runs-on: ubuntu-latest
     steps:
       - name: Upload Asset
         if: steps.create_release.outputs.id != ''
