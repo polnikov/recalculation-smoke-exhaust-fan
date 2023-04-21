@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  checking-changes:
+  release-exe-file:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,22 +20,20 @@ jobs:
             src:
               - 'exe_packages/**'
 
-  creating-tag:
-    needs: checking-changes
-    runs-on: ubuntu-latest
-    steps:
       - name: Create Tag
+        if: steps.check_changes.outputs.src == 'true'
+        id: create_tag
         env:
           TAG_TOKEN: ${{ secrets.TAG_TOKEN }}
         run: |
           git tag "release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
+        env:
+          result: "Hello, world!"
 
-  creating-release:
-    needs: [creating-tag, checking-changes]
-    runs-on: ubuntu-latest
-    steps:
       - name: Create Release
+        if: ${{ steps.create_tag.outcome == 'success' }}
+        id: create_release
         run: |
           release_name="Release $TAG_NAME"
           body=$(cat release_info.md)
@@ -43,10 +41,6 @@ jobs:
           echo "::set-env name=BODY::$body"
           hub release create -m "${{ env.RELEASE_NAME }}" -m "${{ env.BODY }}" $TAG_NAME
 
-  uploading-asset:
-    needs: [creating-tag, checking-changes, creating-release]
-    runs-on: ubuntu-latest
-    steps:
       - name: Upload Asset
         if: steps.create_release.outputs.id != ''
         uses: actions/upload-release-asset@v1
