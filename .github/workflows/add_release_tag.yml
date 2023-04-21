@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  add_tag:
+  add-tag:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,5 +22,5 @@ jobs:
     - name: Create tag
       if: steps.changes.outputs.src == 'true'
       run: |
-        git tag "release $(date +'%Y.%m.%d')"
+        git tag "release/$(date +'%Y.%m.%d')"
         git push --tags
