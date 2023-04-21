@@ -28,8 +28,6 @@ jobs:
         run: |
           git tag "release/v$(date +'%Y.%m.%d')"
           git push --tags https://oauth2:${TAG_TOKEN}@github.com/polnikov/recalculation-smoke-exhaust-fan.git
-        env:
-          result: "Hello, world!"
 
       - name: Create Release
         if: ${{ steps.create_tag.outcome == 'success' }}
