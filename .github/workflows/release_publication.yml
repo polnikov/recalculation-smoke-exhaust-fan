@@ -57,11 +57,11 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset:
-          - path: ./exe_packages/recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
-            name: recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
-            content_type: application/x-msdownload
-          - path: ./recalculation_smoke_exhaust_fan_manual.pdf
-            name: recalculation_smoke_exhaust_fan_manual.pdf
-            content_type: application/x-msdownload
+            - path: ./exe_packages/recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
+              name: recalculation-smoke-exhaust-fan_${{ env.TAG_NAME }}.exe
+              content_type: application/x-msdownload
+            - path: ./recalculation_smoke_exhaust_fan_manual.pdf
+              name: recalculation_smoke_exhaust_fan_manual.pdf
+              content_type: application/x-msdownload
         env:
           GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
