@@ -3,7 +3,7 @@ class CONSTANTS:
     MENU = (
         'Файл',
         'Руководство',
-        'О программе'
+        'Помощь',
     )
     FILE_SUBMENU = (
         'Открыть',
@@ -11,19 +11,26 @@ class CONSTANTS:
         'Сохранить как...',
         'Экспорт в DOCX'
     )
-    MENU_ICONS = (
+    FILE_MENU_ICONS = (
         './icons/open.png',
         './icons/save.png',
         './icons/save_as.png',
         './icons/export.png',
     )
-    MENU_SHORTCUTS = (
+    FILE_MENU_SHORTCUTS = (
         'Ctrl+O',
         'Ctrl+S',
         'Ctrl+Shift+S',
         'Ctrl+E',
     )
-
+    HELP_SUBMENU = (
+        'О программе',
+        'Проверить обновления',
+    )
+    HELP_MENU_ICONS = (
+        './icons/about.png',
+        './icons/update.png',
+    )
     ABOUT = '''<html>
     📄 Программа основана на методике, изложенной в приложении Б ГОСТ 53300-2009<hr>
     💡 Идея: Константин @ <font color="blue">nedich@mail.ru</font><br>

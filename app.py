@@ -5,6 +5,8 @@ import json
 import platform
 import docx
 import requests
+import urllib.request
+from urllib.parse import urlparse
 from datetime import datetime
 
 from docx.shared import Cm, Pt, Mm
@@ -42,7 +44,7 @@ try:
 except ImportError:
     pass
 
-version = '1.0.0'
+version = '1.1.0'
 
 
 class MainWindow(QMainWindow):
@@ -65,9 +67,7 @@ class MainWindow(QMainWindow):
         menubar.addAction(manual_action)
         manual_action.triggered.connect(self.open_manual)
 
-        about_action = QAction(CONSTANTS.MENU[2], self)
-        menubar.addAction(about_action)
-        about_action.triggered.connect(self.show_about)
+        help_menu = menubar.addMenu(CONSTANTS.MENU[2])
 
         FILE_MENU_HANDLERS = (
             self.open,
@@ -77,12 +77,23 @@ class MainWindow(QMainWindow):
         )
         for m in range(4):
             action = QAction(CONSTANTS.FILE_SUBMENU[m], self)
-            action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.MENU_ICONS[m])))
-            action.setShortcut(CONSTANTS.MENU_SHORTCUTS[m])
+            action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.FILE_MENU_ICONS[m])))
+            action.setShortcut(CONSTANTS.FILE_MENU_SHORTCUTS[m])
             file_menu.addAction(action)
             action.triggered.connect(FILE_MENU_HANDLERS[m])
             if m in (0, 2):
                 file_menu.addSeparator()
+
+        HELP_MENU_HANDLERS = (
+            self.show_about,
+            self.check_updates,
+        )
+        for h in range(2):
+            action = QAction(CONSTANTS.HELP_SUBMENU[h], self)
+            action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.HELP_MENU_ICONS[h])))
+            help_menu.addAction(action)
+            action.triggered.connect(HELP_MENU_HANDLERS[h])
+
 
         menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
 
@@ -754,7 +765,7 @@ class MainWindow(QMainWindow):
             reply = QMessageBox.question(
                 self,
                 'Подтверждение',
-                '''<html>Вы уверены, что хотите закрыть программу?<br><font color="red">Не сохраненный расчет будет потерян.</font></html>
+                '''<html><center>Вы уверены, что хотите закрыть программу?<br><font color="red">Не сохраненный расчет будет потерян.</font></center></html>
                 ''',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No
             )
@@ -1344,14 +1355,31 @@ class MainWindow(QMainWindow):
 
 
     def check_updates(self) -> None:
+        current_version = f'v{version}'
         url = 'https://api.github.com/repos/polnikov/recalculation-smoke-exhaust-fan/releases/latest'
         response = requests.get(url)
         data = response.json()
         latest_version = data['tag_name']
-        print(latest_version)
+        download_url = data['assets'][0]['browser_download_url']
+
+        if latest_version != current_version:
+            reply = QMessageBox.information(
+                self, 'Проверка обновления',
+                f'Новая версия {latest_version} доступна для загрузки. Загрузить сейчас?',
+                QMessageBox.Yes | QMessageBox.No
+            )
+            if reply == QMessageBox.Yes:
+                save_path, _ = QFileDialog.getSaveFileName(self, 'Сохранить новую версию', os.path.basename(urlparse(download_url).path))
+                if save_path:
+                    file_content = self._download_file(download_url)
+                    with open(save_path, "wb") as f:
+                        f.write(file_content)
 
 
-
+    def _download_file(url):
+        response = urllib.request.urlopen(url)
+        data = response.read()
+        return data
 
 
 if __name__ == '__main__':
