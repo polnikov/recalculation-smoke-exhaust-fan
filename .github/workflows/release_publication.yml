@@ -24,9 +24,8 @@ jobs:
         if: steps.check_changes.outputs.src == 'true'
         id: get_version
         run: |
-          TAG_NAME=$(grep -o "version = '.*'" app.py | cut -d "'" -f2)
+          TAG_NAME=v$(grep -o "version = '.*'" app.py | cut -d "'" -f2)
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "Calling var from env using env context: ${{ env.TAG_NAME }}"
         env:
           GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
 
