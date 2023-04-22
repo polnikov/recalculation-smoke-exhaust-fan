@@ -29,7 +29,6 @@ MANIFEST
 
 # PyInstaller
 *.manifest
-*.spec
 build/
 
 # Files
