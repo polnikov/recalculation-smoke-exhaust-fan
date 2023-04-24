@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QLabel,
     QGridLayout,
+    QLayout,
     QTableWidget,
     QVBoxLayout,
     QGroupBox,
@@ -44,7 +45,7 @@ try:
 except ImportError:
     pass
 
-version = '1.1.0'
+version = '1.1.1'
 
 
 class MainWindow(QMainWindow):
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
 
-        _layout.addWidget(self.create_board(), alignment=Qt.AlignmentFlag.AlignTop)
+        _layout.addWidget(self.create_board(), alignment=Qt.AlignmentFlag.AlignCenter)
         _layout.addWidget(scroll_area)
 
         scroll_widget = QWidget(scroll_area)
@@ -177,6 +178,8 @@ class MainWindow(QMainWindow):
             button.clicked.connect(BUTTONS_HANDLERS[b])
             _layout.addWidget(button, 0, b+6)
 
+        _layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
+        _layout.setSpacing(20)
         _widget.setLayout(_layout)
         return _widget
 
@@ -1374,6 +1377,8 @@ class MainWindow(QMainWindow):
                     file_content = self._download_file(download_url)
                     with open(save_path, "wb") as f:
                         f.write(file_content)
+        else:
+            QMessageBox.information(self, 'Проверка обновления', 'Вы используете последнюю версию')
 
 
     def _download_file(url):
