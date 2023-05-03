@@ -595,19 +595,22 @@ class MainWindow(QMainWindow):
                 t.style = 'Table Grid'
 
             # setup table header and column widths
-            widths = [75, 28, 28, 28]
             header = table_1.rows[0].cells
             for col in range(4):
                 header[col].text = CONSTANTS.EXPORT.HEADER[col]
-                header[col].width = Mm(widths[col])
                 header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                 header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            widths = [112, 28, 28, 18]
+            for col in range(4):
+                set_column_width(table_1.columns[col], widths[col])
+
 
             columns = table_2.rows[0].cells
             for col in range(4):
-                columns[col].width = Mm(widths[col])
                 header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                 header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            for col in range(4):
+                set_column_width(table_2.columns[col], widths[col])
 
             # write headers
             for i in range(1, CONSTANTS.TABLE1.ROWS):
@@ -664,9 +667,10 @@ class MainWindow(QMainWindow):
 
                 columns = default_table.rows[0].cells
                 for col in range(4):
-                    columns[col].width = Mm(widths[col])
-                    header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-                    header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+                    columns[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    columns[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+                for col in range(4):
+                    set_column_width(default_table.columns[col], widths[col])
 
                 for i in range(3):
                     default_table.columns[0].cells[i].text = CONSTANTS.EXPORT.DEFAULT_TABLE.HEADER[i]
@@ -703,7 +707,6 @@ class MainWindow(QMainWindow):
             result_table.alignment = WD_TABLE_ALIGNMENT.CENTER
             result_table.style = 'Table Grid'
 
-            widths = [68, 38.5, 38.5, 38.5]
             header = result_table.rows[0].cells
             for col in range(4):
                 if col == 2:
@@ -713,7 +716,8 @@ class MainWindow(QMainWindow):
                 if col != 0:
                     header[col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                     header[col].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-                header[col].width = Mm(widths[col])
+            for col in range(4):
+                set_column_width(result_table.columns[col], widths[col])
 
             now = datetime.now()
             date_time = now.strftime("%d_%m_%y_%H_%M")
@@ -1385,6 +1389,12 @@ class MainWindow(QMainWindow):
         response = urllib.request.urlopen(url)
         data = response.read()
         return data
+
+
+def set_column_width(column, width) -> None:
+    column.width = Mm(width)
+    for cell in column.cells:
+        cell.width = Mm(width)
 
 
 if __name__ == '__main__':
