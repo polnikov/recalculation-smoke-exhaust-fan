@@ -31,6 +31,15 @@ class CONSTANTS:
         './icons/about.png',
         './icons/update.png',
     )
+    RECENT_FILES_ICONS = (
+        './icons/1.png',
+        './icons/2.png',
+        './icons/3.png',
+        './icons/4.png',
+        './icons/5.png',
+        './icons/clear.png',
+        './icons/recent_files.png',
+    )
     ABOUT = '''<html>
     📄 Программа основана на методике, изложенной в приложении Б ГОСТ 53300-2009<hr>
     💡 Идея: Константин @ <font color="blue">nedich@mail.ru</font><br>
@@ -208,7 +217,7 @@ class CONSTANTS:
             'd<sub>en</sub> = 2·a<sub>n</sub>·b<sub>n</sub>/(a<sub>n</sub> + b<sub>n</sub>)',
             'F<sub>n</sub> = a<sub>n</sub>·b<sub>n</sub>',
             '-',
-            'ΔG<sub>pn</sub> = F<sub>dpn</sub>·(P<sub>sn</sub>/S<sub>dpn</sub>)<sup>1/2</sub>',
+            'ΔG<sub>dpn</sub> = F<sub>dpn</sub>·(P<sub>sn</sub>/S<sub>dpn</sub>)<sup>1/2</sub>',
             '-',
             '-',
             'F<sub>dpn</sub> = a<sub>dpn</sub>·b<sub>dpn</sub>',
@@ -224,7 +233,7 @@ class CONSTANTS:
             'd<sub>e%d</sub> = 2·a<sub>%d</sub>·b<sub>%d</sub>/(a<sub>%d</sub> + b<sub>%d</sub>)',
             'F<sub>%d</sub> = a<sub>%d</sub>·b<sub>%d</sub>',
             '-',
-            'ΔG<sub>p%d</sub> = F<sub>dp%d</sub>·(P<sub>s%d</sub>/S<sub>dp%d</sub>)<sup>1/2</sub>',
+            'ΔG<sub>dp%d</sub> = F<sub>dp%d</sub>·(P<sub>s%d</sub>/S<sub>dp%d</sub>)<sup>1/2</sub>',
             '-',
             '-',
             'F<sub>dp%d</sub> = a<sub>dp%d</sub>·b<sub>dp%d</sub>',

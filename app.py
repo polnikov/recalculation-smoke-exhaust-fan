@@ -5,14 +5,15 @@ import json
 import platform
 import docx
 import requests
-import urllib.request
-from urllib.parse import urlparse
+import webbrowser
+from functools import partial
+from collections import deque
 from datetime import datetime
 
 from docx.shared import Cm, Pt, Mm
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer, QSettings, QStandardPaths
 from PySide6.QtGui import QColor, QFont, QIcon, QAction
 from PySide6.QtWidgets import (
     QApplication,
@@ -30,6 +31,8 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSpacerItem,
     QFileDialog,
+    QMenu,
+    QProgressDialog,
 )
 
 from constants import CONSTANTS
@@ -45,7 +48,7 @@ try:
 except ImportError:
     pass
 
-version = '1.1.1'
+version = '1.2.0'
 
 
 class MainWindow(QMainWindow):
@@ -95,8 +98,15 @@ class MainWindow(QMainWindow):
             help_menu.addAction(action)
             action.triggered.connect(HELP_MENU_HANDLERS[h])
 
+        self.recent_files_menu = QMenu('Открыть недавние', self)
+        self.recent_files_menu.setIcon(QIcon(os.path.join(basedir, CONSTANTS.RECENT_FILES_ICONS[-1])))
+        file_menu.insertMenu(file_menu.actions()[1], self.recent_files_menu)
+        self.recent_files = deque(maxlen=5)
+        self.settings = QSettings('akudja.technology', 'recalculation-of-the-smoke-exhaust-fan')
+        self.load_recent_files()
+        self.update_recent_files_menu()
 
-        menubar.setStyleSheet('font-family: Consolas; font-size: 11px;')
+        menubar.setStyleSheet('font-family: Consolas; font-size: 12px;')
 
         self.widget = QWidget(self)
         self.setCentralWidget(self.widget)
@@ -491,28 +501,45 @@ class MainWindow(QMainWindow):
 
     def open(self) -> None:
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self, "Открыть файл", "", "JSON файл (*.json);;Все файлы (*)", options=options)
+        open_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
+        file_name, _ = QFileDialog.getOpenFileName(self, 'Выберите файл расчёта', open_dir, 'JSON файл (*.json);;Все файлы (*)', options=options)
+        self._open_file(file_name)
 
-        tables = self.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)
-        for t in range(1, len(tables)):
-            parent_widget = tables[t].parent()
-            parent_widget.deleteLater()
-            self.groupbox_count -= 1
-            self._update_num_tables()
 
+    def _open_file(self, file_name) -> None:
         if file_name:
+            tables = self.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)
+            for t in range(1, len(tables)):
+                parent_widget = tables[t].parent()
+                parent_widget.deleteLater()
+                self.groupbox_count -= 1
+                self._update_num_tables()
+
             try:
                 with open(file_name) as f:
                     data = json.load(f)
+
+                    progress = QProgressDialog('Импорт данных', None, 0, 100, self)
+                    progress.setWindowTitle('Заполнение данных...')
+                    progress.setWindowModality(Qt.WindowModality.WindowModal)
+                    progress.setAutoClose(True)
+                    progress.setMinimumDuration(0)
+                    progress.setValue(0)
+                    progress.setMaximum(100)
+                    progress.show()
+
                     table = self.table_1
                     for n, row in enumerate(CONSTANTS.SAVE_OPEN.TABLE1):
                         table.item(row, 3).setText(data[0]['table_1'][n])
-
                     self.table_2.item(CONSTANTS.SAVE_OPEN.TABLE2, 3).setText(data[1]['table_2'][0])
+
+                    progress.setValue(progress.value() + 10)
 
                     table = self._get_default_table_by_index(0)
                     for n, row in enumerate(CONSTANTS.SAVE_OPEN.DEFAULT_TABLE):
                         table.item(row, 3).setText(data[2]['default_table'][n])
+
+                    progress.setValue(progress.value() + 10)
 
                     for t in range(3, len(data)):
                         box = self.create_default_table()
@@ -521,12 +548,26 @@ class MainWindow(QMainWindow):
                         table = box.findChildren(QTableWidget, CONSTANTS.DEFAULT_TABLE.NAME)[0]
                         for n, row in enumerate(CONSTANTS.SAVE_OPEN.DEFAULT_TABLE):
                             table.item(row, 3).setText(data[t]['default_table'][n])
+
+                        progress.setValue(progress.value() + 5)
+
                     self._update_num_tables()
+
+                    progress.setValue(progress.value() + 10)
+
                 self.current_file_path = file_name
                 self.setWindowTitle(f'{self.app_title} | {file_name}')
-
+                progress.close()
+                self.add_recent_file(file_name)
+            except FileNotFoundError:
+                QMessageBox.critical(self, 'Ошибка', 'Такого файла не существует или он был перемещен')
+                self.recent_files.remove(file_name)
+                self.settings.setValue('recentFiles', list(self.recent_files))
+                self.update_recent_files_menu()
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
+        else:
+            QMessageBox.critical(self, 'Ошибка', 'Что то пошло не так...')
 
 
     def save(self) -> None:
@@ -540,7 +581,8 @@ class MainWindow(QMainWindow):
 
     def save_as(self) -> None:
         data = self._get_data_for_save()
-        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', '', 'JSON (*.json)')
+        save_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
+        file_name, _ = QFileDialog.getSaveFileName(self, 'Сохранить расчёт', save_dir, 'JSON (*.json)')
         if file_name:
             self.current_file_path = file_name
             self.setWindowTitle(f'{self.app_title} | {file_name}')
@@ -684,6 +726,7 @@ class MainWindow(QMainWindow):
                             default_table.columns[1].cells[i].text = (CONSTANTS.EXPORT.DEFAULT_TABLE.SYMBOLS_N[i] % (n - 1))
                         else:
                             default_table.columns[1].cells[i].text = (CONSTANTS.EXPORT.DEFAULT_TABLE.SYMBOLS_N[i] % n)
+                doc.add_paragraph()
 
                 # setup data
                 for i in range(3):
@@ -791,6 +834,9 @@ class MainWindow(QMainWindow):
             else:
                 self.save
                 event.accept()
+
+        self.settings.setValue('recentFiles', list(self.recent_files))
+        super().closeEvent(event)
 
 
     def open_manual(self) -> None:
@@ -1102,10 +1148,10 @@ class MainWindow(QMainWindow):
                 Fdpn = tables[i].item(12, 3).text()
                 if all([temperature_a, Psn, Fdpn]):
                     temperature_a = float(temperature_a)
-                    devider = 29_900 if temperature_a <= 20 else 30_300
+                    divider = 29_900 if temperature_a <= 20 else 30_300
                     Psn = float(Psn)
                     Fdpn = float(Fdpn)
-                    result = Fdpn * pow(Psn / devider, 0.5)
+                    result = Fdpn * pow(Psn / divider, 0.5)
                     result = "{:.3f}".format(round(result, 3))
                     tables[i].item(9, 3).setText(result)
                 else:
@@ -1118,10 +1164,10 @@ class MainWindow(QMainWindow):
             Fdpn = table.item(12, 3).text()
             if all([temperature_a, Psn, Fdpn]):
                 temperature_a = float(temperature_a)
-                devider = 29_900 if temperature_a <= 20 else 30_300
+                divider = 29_900 if temperature_a <= 20 else 30_300
                 Psn = float(Psn)
                 Fdpn = float(Fdpn)
-                result = Fdpn * pow(Psn / devider, 0.5)
+                result = Fdpn * pow(Psn / divider, 0.5)
                 result = "{:.3f}".format(round(result, 3))
                 table.item(9, 3).setText(result)
             else:
@@ -1376,19 +1422,56 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes | QMessageBox.No
             )
             if reply == QMessageBox.Yes:
-                save_path, _ = QFileDialog.getSaveFileName(self, 'Сохранить новую версию', os.path.basename(urlparse(download_url).path))
-                if save_path:
-                    file_content = self._download_file(download_url)
-                    with open(save_path, "wb") as f:
-                        f.write(file_content)
+                self.download_file(download_url)
         else:
             QMessageBox.information(self, 'Проверка обновления', 'Вы используете последнюю версию')
 
 
-    def _download_file(url):
-        response = urllib.request.urlopen(url)
-        data = response.read()
-        return data
+    def open_recent_file(self, file_path):
+        self._open_file(file_path)
+
+
+    def add_recent_file(self, file_path):
+        if file_path not in self.recent_files:
+            self.recent_files.appendleft(file_path)
+        else:
+            self.recent_files.remove(file_path)
+            self.recent_files.appendleft(file_path)
+        self.settings.setValue('recentFiles', list(self.recent_files))
+        self.update_recent_files_menu()
+
+
+    def load_recent_files(self):
+        recent_files = self.settings.value('recentFiles', [])
+        if recent_files:
+            self.recent_files.extend(recent_files)
+
+
+    def update_recent_files_menu(self) -> None:
+        self.recent_files_menu.clear()
+        recent_files = self.settings.value('recentFiles', [])
+        for i, file_path in enumerate(recent_files):
+            action = QAction(file_path, self)
+            action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.RECENT_FILES_ICONS[i])))
+            action.triggered.connect(partial(self.open_recent_file, file_path))
+            self.recent_files_menu.addAction(action)
+
+        self.recent_files_menu.addSeparator()
+
+        clear_action = QAction('Очистить список', self)
+        clear_action.setIcon(QIcon(os.path.join(basedir, CONSTANTS.RECENT_FILES_ICONS[-2])))
+        clear_action.triggered.connect(self.clear_recent_files)
+        self.recent_files_menu.addAction(clear_action)
+
+
+    def clear_recent_files(self):
+        self.recent_files.clear()
+        self.settings.remove('recentFiles')
+        self.update_recent_files_menu()
+
+
+    def download_file(url):
+        webbrowser.open(url)
 
 
 def set_column_width(column, width) -> None:
